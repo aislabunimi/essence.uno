@@ -1,0 +1,52 @@
+<body>
+  <div class="centered">
+    <h1>Uno</h1>
+    <h2>Create a new room</h2>
+    <form method="post" id="form" action="/game" onsubmit="createRoom()">
+      <h3>Choose a Name</h3>
+      <input type="text" name="name" id="name" placeholder="Name" autocomplete="off" required />
+      <h3>Choose a Surname</h3>
+      <input type="text" name="surname" id="surname" placeholder="Surname" autocomplete="off" required />
+      <br />
+      <h3>Choose a Room Name, if you want to create a new one</h3>
+      <input type="text" name="roomName" id="roomName" minlength="3" required autocomplete="off"
+        placeholder="Room Name" />
+      <h3>Choose the number of players</h3>
+      <select name="players" id="nPlayers" required>
+        <option value="2">2</option>
+        <option value="3">3</option>
+        <option value="4">4</option>
+        <option value="5">5</option>
+        <option value="6">6</option>
+        <option value="7">7</option>
+        <option value="8">8</option>
+        <option value="9">9</option>
+        <option value="10">10</option>
+      </select>
+      <button id="createRoomButton">
+        Create room
+      </button>
+    </form>
+    <h2>Or join one that already exists</h2>
+    <table id="roomTable" class="centered-table">
+      <tr>
+        <th>Room name</th>
+        <th>Players</th>
+        <th></th>
+      </tr>
+      <tbody id="rows">
+        {{#each rooms}}
+        <tr>
+          <td>{{this.name}}</td>
+          <td>{{this.players}}/{{this.maxPlayers}}</td>
+          <td><button onclick="joinRoom('{{this.name}}')">Join</button></td>
+        </tr>
+        {{/each}}
+      </tbody>
+    </table>
+  </div>
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="javascripts/index.js"></script>
+</body>
+
+</html>
