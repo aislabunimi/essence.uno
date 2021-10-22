@@ -11,6 +11,7 @@ export default class GameScene extends Phaser.Scene {
     console.log('Loading info from cookies');
     this.roomName = getCookie('roomName');
     this.user = {
+      uuid: getCookie('uuid').slice(2),
       name: getCookie('name'),
       surname: getCookie('surname'),
     };
@@ -40,6 +41,8 @@ export default class GameScene extends Phaser.Scene {
       reverse: 'The direction \nof the game \nhas been reversed',
       draw2: 'You drew 2 cards',
       draw4: 'You drew 4 cards',
+      disconnected: 'You were disconnected',
+      full: 'The room is full',
       end: 'won!',
     };
 

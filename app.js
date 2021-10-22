@@ -19,7 +19,14 @@ app.use(session({
   secret: 'keyboard cat',
   resave: true,
   saveUninitialized: true,
-  cookie: { sameSite: 'strict' },
+  cookie: {
+    // solves warnings with https
+    sameSite: 'strict',
+    // this allows me to read the cookie from the client
+    // so that I can reuse the session id as user id
+    httpOnly: false,
+  },
+  name: 'uuid',
 }));
 
 // app.use(logger('dev'));

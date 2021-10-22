@@ -7,7 +7,7 @@ export default class ZoneHandler {
     console.log(
       `joining room ${scene.roomName}, with name ${scene.user.name} ${scene.user.surname}`,
     );
-    this.socket.emit('join_room', scene.roomName, scene.user.name, scene.user.surname);
+    this.socket.emit('join_room', scene.roomName, scene.user.name, scene.user.surname, scene.user.uuid);
     this.socket.on('room_not_found', () => {
       // go back to lobby
       window.history.back();
@@ -42,6 +42,12 @@ export default class ZoneHandler {
     });
     this.socket.on('reset', () => {
       scene.GameHandler.reset();
+    });
+    this.socket.on('room_full', () => {
+      scene.GameHandler.full();
+    });
+    this.socket.on('disconnected', () => {
+      scene.GameHandler.disconnect();
     });
   }
   discard(card) {

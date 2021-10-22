@@ -39,8 +39,8 @@ io.on('connection', (socket) => {
     });
   });
 
-  socket.on('join_room', (roomName, name, surname) => {
-    console.log(roomName, ': joined by', name, surname);
+  socket.on('join_room', (roomName, name, surname, uuid) => {
+    console.log(`${roomName}: joined by ${name} ${surname} (${uuid})`);
     // find room the user want to join
     const room = rooms.find((r) => r.name === roomName);
     if (room) {
@@ -48,12 +48,31 @@ io.on('connection', (socket) => {
       socket.join(roomName);
       // saving room name
       roomNameSocket = room.name;
-      // adding player to game
-      room.game.addPlayer(socket.id, name, surname);
       // updating number of players in the room
       room.players += 1;
       // update already connected players's board
       io.to(room.name).emit('update_board', room.game.getPlayersInfo());
+      // check if user was already in the room
+      if (room.game.isAlreadyPlaying(uuid)) {
+        // send event to old socket to disconnect
+        io.to(room.game.getPlayerUUID(uuid).socketId).emit('disconnected');
+        // reconnect him to the room and set him up again
+        const player = room.game.reconnectPlayer(socket.id, uuid);
+        if (room.game.started) {
+          setup(room.game, player);
+          updateRoom(room);
+        }
+        return;
+      }
+      if (room.game.started) {
+        // if the game has already started and the new
+        // user wasn't already a player in that room,
+        // disconnect him
+        io.to(socket.id).emit('room_full');
+        return;
+      }
+      // adding player to game
+      room.game.addPlayer(socket.id, name, surname, uuid);
       if (room.game.isReady()) {
         // if the room is full, start the game
         room.game.start();
@@ -118,20 +137,24 @@ io.on('connection', (socket) => {
     const room = rooms.find((r) => r.name === roomNameSocket);
     if (room) {
       // if room exists, remove player from room
-      room.game.removePlayer(socket.id);
+      // room.game.removePlayer(socket.id);
       // update number of players in the room
       room.players -= 1;
       // update already connected players's board
-      io.to(room.name).emit('update_board', room.game.getPlayersInfo());
-
+      // io.to(room.name).emit('update_board', room.game.getPlayersInfo());
       // if the room is empty, delete it
+      // set him as disconnected in the game
+      room.game.disconnectPlayer(socket.id);
+      // update players board
+      io.to(room.name).emit('update_board', room.game.getPlayersInfo());
+      // delete room if empty
       if (room.players === 0) {
         console.log(room.name, ': deleted');
         rooms.splice(rooms.indexOf(room), 1);
       }
       else {
         // if the room is not empty, reset the room
-        resetRoom(room);
+        // resetRoom(room);
       }
     }
   });
@@ -177,8 +200,8 @@ function resetRoom(room) {
 
 // I use callbacks to allow Uno.js to use sockets while still having
 // all sockets related functions in the same file
-function drawCallback(playerId, newCards) {
-  io.to(playerId).emit('draw', newCards);
+function drawCallback(socketId, newCards) {
+  io.to(socketId).emit('draw', newCards);
 }
 
 function unoCallback(roomString) {

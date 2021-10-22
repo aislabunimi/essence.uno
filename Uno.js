@@ -73,28 +73,45 @@ class Uno {
     }
   }
 
-  addPlayer(playerId, name, surname) {
+  addPlayer(socketId, name, surname, uuid) {
     this.players.push({
-      socketId: playerId,
+      socketId: socketId,
+      uuid: uuid,
       name: name,
       surname: surname,
+      connected: true,
       turn: this.players.length,
       hand: [],
       hasDrawn: false,
       wins: 0,
     });
   }
-
-  replacePlayer(playerID, name, surname) {
-    const player = this.players.find(p =>
-      p.name === name && p.surname === surname);
-    player.socketId = playerID;
-    return player;
+  getPlayerUUID(uuid) {
+    return this.players.find(player => player.uuid === uuid);
+  }
+  getPlayerSocketId(socketId) {
+    return this.players.find(player => player.socketId === socketId);
   }
 
-  isAlreadyPlaying(name, surname) {
+  isAlreadyPlaying(uuid) {
     return this.players.some(player =>
-      player.name === name && player.surname === surname);
+      player.uuid === uuid);
+  }
+
+  disconnectPlayer(socketId) {
+    const player = this.getPlayerSocketId(socketId);
+    if (player) {
+      player.connected = false;
+    }
+  }
+
+  reconnectPlayer(socketId, uuid) {
+    const player = this.players.find(p =>
+      p.uuid === uuid);
+    player.socketId = socketId;
+    player.connected = true;
+
+    return player;
   }
 
   removePlayer(playerId) {
@@ -327,6 +344,7 @@ class Uno {
       players.push({
         name: player.name,
         surname: player.surname,
+        connected: player.connected,
         turn: player.turn,
         hand: player.hand.length,
         wins: player.wins,

@@ -137,5 +137,19 @@ export default class GameHandler {
       this.availableMoves = [];
       scene.UIHandler.reset();
     };
+    this.full = () => {
+      scene.UIHandler.buildAlertBox(scene.strings.full);
+      setTimeout(() => {
+        window.history.go(-1);
+      }
+      , 3000);
+    };
+    this.disconnect = () => {
+      scene.UIHandler.buildAlertBox(scene.strings.disconnected, null, null);
+      setTimeout(() => {
+        window.history.go(-1);
+      }
+      , 3000);
+    };
   }
 }

@@ -4,7 +4,7 @@ import HandCard from './cards/HandCard.js';
 import PlayedCard from './cards/PlayedCard.js';
 
 const redCardColor = 0xea323c;
-const blueCardColor = 0x0098dc;
+// const blueCardColor = 0x0098dc;
 // const yellowCardColor = 0xffc825;
 const greenCardColor = 0x33984b;
 const greyColor = 0x999999;
@@ -58,6 +58,9 @@ export default class UIHandler {
           playerText,
           { fontStyle: 'bold', fontSize: '20px', fill: '#FFFFFF' },
         );
+        if (!player.connected) {
+          this.tintRed(text);
+        }
         scene.PlayersBoardGroup.add(text);
       }
     };
