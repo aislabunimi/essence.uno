@@ -1,4 +1,4 @@
-export default class ZoneHandler {
+export default class SocketHandler {
   constructor(scene) {
     // opening socket
     this.socket = io();
