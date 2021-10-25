@@ -43,7 +43,7 @@ export default class SocketHandler {
     this.socket.on('uno', () => {
       scene.GameHandler.uno();
     });
-    this.socket.on('clearUno', () => {
+    this.socket.on('clear_uno', () => {
       scene.GameHandler.clearUno();
     });
     this.socket.on('reset', () => {

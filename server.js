@@ -94,8 +94,11 @@ io.on('connection', (socket) => {
   });
 
   socket.on('discard', card => {
+    // find the room the card was discarded in
     const room = rooms.find((r) => r.name === roomNameSocket);
+    // telling other players which card was discarded
     io.to(room.name).emit('discard', card);
+    // discarding the card
     room.game.discard(card);
 
     updateRoom(room);
@@ -105,7 +108,7 @@ io.on('connection', (socket) => {
     // disable waiting for said_uno and contest_uno event
     socket.removeAllListeners(['said_uno', 'contest_uno']);
     // tell the room that the uno event is done
-    io.to(roomNameSocket).emit('clearUno');
+    io.to(roomNameSocket).emit('clear_uno');
   });
 
   socket.on('contest_uno', () => {
@@ -136,14 +139,18 @@ io.on('connection', (socket) => {
   });
 
   socket.on('draw', () => {
+    // find the room the player that wants to draw is in
     const room = rooms.find((r) => r.name === roomNameSocket);
+    // draw a card
     room.game.draw();
 
     updateRoom(room);
   });
 
   socket.on('pass', () => {
+    // find the room the player that wants to pass is in
     const room = rooms.find((r) => r.name === roomNameSocket);
+    // pass turn
     room.game.nextTurn();
 
     updateRoom(room);
