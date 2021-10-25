@@ -101,7 +101,7 @@ export default class UIHandler {
         acceptButton.setInteractive();
         acceptButton.on('pointerdown', () => {
           if (timeout) clearTimeout(timeoutVar);
-          this.alertBoxGroup.clear(true, true);
+          this.hideAlertBox();
           accept();
         });
       }
@@ -115,7 +115,7 @@ export default class UIHandler {
         refuseButton.setInteractive();
         refuseButton.on('pointerdown', () => {
           if (timeout) clearTimeout(timeoutVar);
-          this.alertBoxGroup.clear(true, true);
+          this.hideAlertBox();
           refuse();
         });
       }
@@ -123,6 +123,9 @@ export default class UIHandler {
         scene.dropGroup.countActive(),
         scene.playerHandGroup.countActive());
       this.alertBoxGroup.setDepth(maxDepth + 1);
+    };
+    this.hideAlertBox = () => {
+      this.alertBoxGroup.clear(true, true);
     };
 
     this.buildUI = () => {
@@ -278,7 +281,7 @@ export default class UIHandler {
 
     this.ready = () => {
       // if (this.waitingForPlayers) this.waitingForPlayers.destroy();
-      this.alertBoxGroup.clear(true, true);
+      this.hideAlertBox();
       // scene.colorPickerGroup.clear(true, true);
     };
 

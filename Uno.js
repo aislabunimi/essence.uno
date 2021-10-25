@@ -30,9 +30,9 @@ for (const type of special_types) {
 // debugging cards
 /* debugCards = [];
 for (let i = 0; i < cards.length; i++) {
-  if (i === 14) {
+  if (i === 2 || i == 3) {
     const color = 'Blank';
-    const type = 'Wild';
+    const type = 'WildDraw';
     debugCards.push({
       name: `${color}_${type}`,
       color: color,
@@ -46,7 +46,8 @@ for (let i = 0; i < cards.length; i++) {
 cards.splice(0, cards.length, ...debugCards); */
 
 class Uno {
-  constructor(roomName, maxPlayers, drawCallback, unoCallback, winCallback) {
+  constructor(roomName, maxPlayers, drawCallback, unoCallback,
+    wild4ContestCallback, winCallback) {
     this.roomName = roomName;
     this.deck = this.shuffleCards([...cards]);
     this.discarded = [];
@@ -56,8 +57,10 @@ class Uno {
     this.started = false;
     this.order = 1;
     this.unoTarget = null;
+    this.lastPlayer = null;
     this.drawCallback = drawCallback;
     this.unoCallback = unoCallback;
+    this.wild4ContestCallback = wild4ContestCallback;
     this.winCallback = winCallback;
   }
 
@@ -185,11 +188,11 @@ class Uno {
     // const moves = [...player.hand.filter(c => c.type.includes('Wild'))];
     const moves = [];
 
-    // if the player drew a card, he can only play that or pass
+    // if the player drew a card, they can only play that or pass
     if (player.hasDrawn) {
       const card = player.hand[player.hand.length - 1];
       // if the discarded card is a wild card without color,
-      // the player can play anything he drew or pass
+      // the player can play anything they drew or pass
       if (discardedCard.color === 'Blank') {
         moves.push(card);
       }
@@ -231,6 +234,7 @@ class Uno {
 
   discard(card) {
     const player = this.players[this.currentPlayer];
+    this.lastPlayer = this.currentPlayer;
 
     let cardToSearchInhand = card;
     // If the card is a wild one, the color and name won't match with hand
@@ -257,8 +261,8 @@ class Uno {
         this.unoCallback(this.roomName);
       }
 
-      this.specialEffects(card);
       this.discarded.push(card);
+      this.specialEffects(card);
 
       // if the player that discarded the card has no more cards,
       // the game is over and the player that won is the one that discarded
@@ -292,23 +296,20 @@ class Uno {
   }
 
   nextTurn() {
-    this.currentPlayer = (this.currentPlayer + this.order) % this.maxPlayers;
-    if (this.currentPlayer === -1) {
-      this.currentPlayer = this.maxPlayers - 1;
-    }
+    this.currentPlayer = this.getNextTurn();
     // reset the player's hasDrawn flag
     this.players[this.currentPlayer].hasDrawn = false;
   }
-
-  getPreviousTurn() {
-    let player = (this.currentPlayer - this.order) % this.maxPlayers;
-    if (player === -1) {
-      player = this.maxPlayers - 1;
+  // returns the number of the player that should play next
+  getNextTurn() {
+    const nextPlayer = (this.currentPlayer + this.order) % this.maxPlayers;
+    if (nextPlayer === -1) {
+      return this.maxPlayers - 1;
     }
-    return player;
+    return nextPlayer;
   }
 
-  specialEffects(card, draw) {
+  specialEffects(card) {
     switch (card.type) {
     case 'Skip': {
       this.nextTurn();
@@ -329,12 +330,43 @@ class Uno {
       break;
     }
     case 'WildDraw': {
-      this.nextTurn();
-      const newCards = this.dealCards(4);
-      this.players[this.currentPlayer].hand.push(...newCards);
-      this.drawCallback(this.players[this.currentPlayer].socketId, newCards);
+      const nextPlayer = this.players[this.getNextTurn()];
+      // saving the playerHand after the wild card was played to avoid
+      // problems with contesting if the player draws cards after playing
+      // the wildDraw one from e.g. being contested for UNO
+      const playerHand = [...this.players[this.lastPlayer].hand];
+      this.playerHandAfterWildDraw = playerHand;
+      // calling callback to let the player know that they can contest
+      this.wild4ContestCallback(this.roomName, nextPlayer.socketId);
       break;
     }
+    }
+  }
+  contest4(contesting) {
+    if (contesting) {
+      // if the player wants to contest
+      // find the top discard card when the wildDraw was played
+      const lastCard = this.discarded[this.discarded.length - 2];
+      // check if the hand of the player that played the wildDraw
+      // contains any onether card that could be played
+      for (const card of this.playerHandAfterWildDraw) {
+        if (card.type != 'WildDraw' && this.cardIsPlayable(card, lastCard)) {
+          // the player could have played something else than wildDraw
+          // so they'll draw 4 cards
+          this.forcedDraw(4, this.lastPlayer);
+          return;
+        }
+      }
+      // the player couldn't have played something else,
+      // the next player will draw 6 cards and skip turn
+      this.forcedDraw(6, this.currentPlayer);
+      this.nextTurn();
+    }
+    else {
+      // if the player doesn't want to contest,
+      // they will draw 4 cards and skip turn
+      this.forcedDraw(4, this.currentPlayer);
+      this.nextTurn();
     }
   }
 

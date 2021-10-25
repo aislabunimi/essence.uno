@@ -94,7 +94,7 @@ export default class GameHandler {
     this.drawClient = () => {
       if (this.myTurn === this.currentTurn && this.availableMoves.includes('Draw')) {
         scene.SocketHandler.drawCard();
-        scene.UIHandler.showButton('Pass', () => {
+        scene.UIHandler.showButton(scene.strings.pass, () => {
           scene.SocketHandler.pass();
           scene.UIHandler.hideButton();
         });
@@ -102,12 +102,12 @@ export default class GameHandler {
     };
     this.uno = () => {
       if (this.isMyTurn() && scene.playerHandGroup.getChildren().length === 1) {
-        scene.UIHandler.showButton('Uno!', () => {
+        scene.UIHandler.showButton(scene.strings.uno, () => {
           scene.SocketHandler.saidUno();
         });
       }
       else {
-        scene.UIHandler.showButton('Contest uno!', () => {
+        scene.UIHandler.showButton(scene.strings.contestUno, () => {
           console.log('contest uno');
           scene.SocketHandler.contestUno();
         });
@@ -115,6 +115,24 @@ export default class GameHandler {
     };
     this.clearUno = () => {
       scene.UIHandler.hideButton();
+    };
+
+    this.contestDrawFour = () => {
+      scene.UIHandler.buildAlertBox(
+        scene.strings.contest4,
+        () => {
+          console.log('contest 4: true');
+          scene.SocketHandler.contest4(true);
+        },
+        () => {
+          console.log('contest 4: false');
+          scene.SocketHandler.contest4(false);
+        },
+        10000,
+      );
+    };
+    this.clearDrawFour = () => {
+      scene.UIHandler.hideAlertBox();
     };
 
     this.updateAvailableMoves = (availableMoves) => {

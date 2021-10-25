@@ -13,6 +13,9 @@ app.set('socketio', io);
 const rooms = [];
 app.set('rooms', rooms);
 
+// timeout to contest +4
+let contest4Timeout;
+
 io.on('connection', (socket) => {
   // console.log('user connected:', socket.id);
 
@@ -35,7 +38,7 @@ io.on('connection', (socket) => {
       maxPlayers: maxPlayers,
       game: new Uno(
         roomName, maxPlayers, drawCallback,
-        unoCallback, winCallback),
+        unoCallback, wild4ContestCallback, winCallback),
     });
   });
 
@@ -118,6 +121,20 @@ io.on('connection', (socket) => {
     updateRoom(room);
   });
 
+  socket.on('contest_4', (contesting) => {
+    if (contest4Timeout) {
+      // if the contest_4 event is called before the timeout,
+      // clear the timeout
+      clearTimeout(contest4Timeout);
+      // find the room the player was in
+      const room = rooms.find((r) => r.name === roomNameSocket);
+      // contest4
+      room.game.contest4(contesting);
+
+      updateRoom(room);
+    }
+  });
+
   socket.on('draw', () => {
     const room = rooms.find((r) => r.name === roomNameSocket);
     room.game.draw();
@@ -128,6 +145,7 @@ io.on('connection', (socket) => {
   socket.on('pass', () => {
     const room = rooms.find((r) => r.name === roomNameSocket);
     room.game.nextTurn();
+
     updateRoom(room);
   });
 
@@ -207,6 +225,18 @@ function drawCallback(socketId, newCards) {
 function unoCallback(roomString) {
   // tell the room that one players has one card
   io.to(roomString).emit('uno');
+}
+
+function wild4ContestCallback(roomString, socketId) {
+  // tell the next player that they can contest the wild 4
+  io.to(socketId).emit('contest_draw_four');
+  // if they doesn't answer in time, they will draw 4 cards
+  contest4Timeout = setTimeout(() => {
+    io.to(socketId).emit('clear_draw_four');
+    const room = rooms.find((r) => r.name === roomString);
+    room.game.contest4(false);
+  }
+  , 10000);
 }
 
 function winCallback(roomString, player) {

@@ -19,6 +19,12 @@ export default class SocketHandler {
     this.socket.on('discard', (card) => {
       scene.GameHandler.discardServer(card);
     });
+    this.socket.on('contest_draw_four', () => {
+      scene.GameHandler.contestDrawFour();
+    });
+    this.socket.on('clear_draw_four', () => {
+      scene.GameHandler.clearDrawFour();
+    });
     this.socket.on('draw', cards => {
       scene.GameHandler.draw(cards);
     });
@@ -64,5 +70,8 @@ export default class SocketHandler {
   }
   contestUno() {
     this.socket.emit('contest_uno');
+  }
+  contest4(bool) {
+    this.socket.emit('contest_4', bool);
   }
 }
