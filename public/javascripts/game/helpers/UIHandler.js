@@ -43,7 +43,6 @@ export default class UIHandler {
     };
 
     this.updatePlayersBoard = (players) => {
-      // TODO: fix this mess
       scene.PlayersBoardGroup.clear(true, true);
       for (const player of players) {
         let playerText = `${player.name} ${player.surname}, 🎴: ${player.hand}, 🏆: ${player.wins}`;
@@ -66,14 +65,20 @@ export default class UIHandler {
     };
 
     this.buildAlertBox = (text, accept, refuse, timeout) => {
-      if (this.alertBoxGroup) this.alertBoxGroup.clear(true, true);
-      this.alertBoxGroup = scene.add.group();
+      if (scene.alertBoxGroup) scene.alertBoxGroup.clear(true, true);
+      if (scene.playerHandGroup) {
+        for (const card of scene.playerHandGroup.getChildren()) {
+          console.log('disabling', card);
+          card.disableInteractive();
+        }
+      }
+      scene.alertBoxGroup = scene.add.group();
       const background = scene.add.image(
         600,
         500,
         'Blank_Background',
       );
-      this.alertBoxGroup.add(background);
+      scene.alertBoxGroup.add(background);
       const alertBoxText = scene.add.text(
         background.x + 10,
         background.y,
@@ -84,20 +89,20 @@ export default class UIHandler {
       let timeoutVar = null;
       if (timeout) {
         timeoutVar = setTimeout(() => {
-          this.alertBoxGroup.clear(true, true);
+          scene.alertBoxGroup.clear(true, true);
           if (refuse) {
             refuse();
           }
         }, timeout);
       }
-      this.alertBoxGroup.add(alertBoxText);
+      scene.alertBoxGroup.add(alertBoxText);
       if (accept) {
         const acceptButton = scene.add.image(
           background.x + 1 / 3 * background.width,
           background.y + 3 / 6 * background.height,
           'Green_Okay',
         ).setScale(0.2);
-        this.alertBoxGroup.add(acceptButton);
+        scene.alertBoxGroup.add(acceptButton);
         acceptButton.setInteractive();
         acceptButton.on('pointerdown', () => {
           if (timeout) clearTimeout(timeoutVar);
@@ -111,7 +116,7 @@ export default class UIHandler {
           background.y + 3 / 6 * background.height,
           'Red_No',
         ).setScale(0.2);
-        this.alertBoxGroup.add(refuseButton);
+        scene.alertBoxGroup.add(refuseButton);
         refuseButton.setInteractive();
         refuseButton.on('pointerdown', () => {
           if (timeout) clearTimeout(timeoutVar);
@@ -122,10 +127,15 @@ export default class UIHandler {
       const maxDepth = Math.max(
         scene.dropGroup.countActive(),
         scene.playerHandGroup.countActive());
-      this.alertBoxGroup.setDepth(maxDepth + 1);
+      scene.alertBoxGroup.setDepth(maxDepth + 1);
     };
     this.hideAlertBox = () => {
-      this.alertBoxGroup.clear(true, true);
+      scene.alertBoxGroup.clear(true, true);
+      if (scene.playerHandGroup) {
+        for (const card of scene.playerHandGroup.getChildren()) {
+          card.setInteractive();
+        }
+      }
     };
 
     this.buildUI = () => {
