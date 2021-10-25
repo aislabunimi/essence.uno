@@ -30,9 +30,9 @@ for (const type of special_types) {
 // debugging cards
 /* debugCards = [];
 for (let i = 0; i < cards.length; i++) {
-  if (i === 2 || i == 3) {
-    const color = 'Blank';
-    const type = 'WildDraw';
+  if (i === 1 || i == 2) {
+    const color = 'Red';
+    const type = 'Draw';
     debugCards.push({
       name: `${color}_${type}`,
       color: color,
@@ -56,7 +56,6 @@ class Uno {
     this.maxPlayers = maxPlayers;
     this.started = false;
     this.order = 1;
-    this.unoTarget = null;
     this.lastPlayer = null;
     this.drawCallback = drawCallback;
     this.unoCallback = unoCallback;
@@ -70,12 +69,14 @@ class Uno {
     this.currentPlayer = 0;
     this.started = false;
     this.lastWildColor = null;
+    this.lastPlayer = null;
     this.order = 1;
     for (const player of this.players) {
       player.hand = [];
     }
   }
 
+  // adds a new player to the game and initializes it
   addPlayer(socketId, name, surname, uuid) {
     this.players.push({
       socketId: socketId,
@@ -89,18 +90,22 @@ class Uno {
       wins: 0,
     });
   }
+  // get a player from their uuid
   getPlayerUUID(uuid) {
     return this.players.find(player => player.uuid === uuid);
   }
+  // get a player from their socketId
   getPlayerSocketId(socketId) {
     return this.players.find(player => player.socketId === socketId);
   }
 
+  // check if a player is already in the game, given a uuid
   isAlreadyPlaying(uuid) {
     return this.players.some(player =>
       player.uuid === uuid);
   }
 
+  // sets the connected flag of the player with matching socketId to false
   disconnectPlayer(socketId) {
     const player = this.getPlayerSocketId(socketId);
     if (player) {
@@ -108,28 +113,32 @@ class Uno {
     }
   }
 
+  // update the socketID and connected flag of the player with the given uuid
   reconnectPlayer(socketId, uuid) {
-    const player = this.players.find(p =>
-      p.uuid === uuid);
+    const player = this.players.find(p => p.uuid === uuid);
     player.socketId = socketId;
     player.connected = true;
-
     return player;
   }
 
-  removePlayer(playerId) {
+  // remove a player given his socketId
+  // NOT USED
+  removePlayer(socketId) {
     // remove player from the array of players
-    this.players = this.players.filter(player => player.socketId !== playerId);
+    this.players = this.players.filter(player => player.socketId !== socketId);
     // update others players turn
     for (let i = 0; i < this.players.length; i++) {
       this.players[i].turn = i;
     }
   }
 
+  // returns true if the game hasn't started yet and if the number of players is valid
   isReady() {
     return this.players.length === this.maxPlayers && this.started === false;
   }
 
+  // shuffles an array of cards using the Dusternfeld shuffle algorithm
+  // https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle#The_modern_algorithm
   shuffleCards(array) {
     for (let i = array.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
@@ -138,6 +147,7 @@ class Uno {
     return array;
   }
 
+  // returns an array of cards taken from this.deck
   dealCards(cardsNumber) {
     if (cardsNumber > this.deck.length) {
       // keep the last card from the discard pile
@@ -159,7 +169,9 @@ class Uno {
     return cardsToDeal;
   }
 
+  // initialized the game
   start() {
+    // deal the cards to the players
     this.players.forEach(player => {
       player.hand = this.dealCards(7);
     });
@@ -176,13 +188,15 @@ class Uno {
     // to the first player
     // This also makes the first player the one after the room creator
     this.players[this.currentPlayer].hand.push(firstDiscard);
+    // discard the first card
     this.discard(firstDiscard);
     this.discarded.push(firstDiscard);
+    // set the game started flag to true
     this.started = true;
   }
 
+  // generates available moves for current player
   moves() {
-    // Generation of available moves for current player
     const player = this.players[this.currentPlayer];
     const discardedCard = this.discarded[this.discarded.length - 1];
     // const moves = [...player.hand.filter(c => c.type.includes('Wild'))];
@@ -199,11 +213,13 @@ class Uno {
       if (this.cardIsPlayable(card, discardedCard)) {
         moves.push(card);
       }
+      // the player can always pass after drawing
       moves.push('Pass');
       console.log(moves);
       return moves;
     }
 
+    // the player can draw once per turn
     moves.push('Draw');
 
     if (discardedCard.color === 'Blank') {
@@ -218,6 +234,7 @@ class Uno {
     return moves;
   }
 
+  // checks if a card is playable given the card and the discarded card
   cardIsPlayable(card, lastCard) {
     if (card.type === lastCard.type ||
       card.color === lastCard.color) {
@@ -231,11 +248,11 @@ class Uno {
     return false;
   }
 
-
+  // discards a card from the player's hand
   discard(card) {
     const player = this.players[this.currentPlayer];
+    // updating lastPlayer to the current player
     this.lastPlayer = this.currentPlayer;
-
     let cardToSearchInhand = card;
     // If the card is a wild one, the color and name won't match with hand
     // so we create a new card with the values that will match the one in the hand
@@ -246,24 +263,22 @@ class Uno {
         type: card.type,
       };
     }
-
     if (player.hand.some(c => c.name === cardToSearchInhand.name)) {
+      // find the card in the player's hand
       const cardIndex = player.hand.findIndex(
         c => c.name === cardToSearchInhand.name,
       );
       player.hand.splice(cardIndex, 1);
-
       // if the player hand has only one card left,
       // allow the player to say UNO
       // allow the other players to make him draw if they are faster.
       if (player.hand.length === 1) {
-        this.unoTarget = this.currentPlayer;
         this.unoCallback(this.roomName);
       }
-
+      // add the card to the discard pile
       this.discarded.push(card);
+      // trigger special card effects
       this.specialEffects(card);
-
       // if the player that discarded the card has no more cards,
       // the game is over and the player that won is the one that discarded
       if (player.hand.length === 0) {
@@ -276,18 +291,27 @@ class Uno {
     }
     this.nextTurn();
   }
+  // used when a player contest another that hasn't called UNO fast enough
   contestUno() {
-    this.forcedDraw(2, this.unoTarget);
+    // force the last player to draw 2 cards
+    this.forcedDraw(2, this.lastPlayer);
   }
 
+  // draws a card from the deck
   draw() {
     const player = this.players[this.currentPlayer];
+    // get a card from the deck
     const newCards = this.dealCards(1);
+    // add the card to the player's hand
     player.hand.push(...newCards);
+    // callback to update frontend and draw the new card
     this.drawCallback(player.socketId, newCards);
+    // set the player's hasDrawn flag to true
     player.hasDrawn = true;
   }
 
+  // same as draw but used only for special cards effects or contesting
+  // takes a number of cards to draw and a player's index
   forcedDraw(number, playerNumber = this.currentPlayer) {
     const player = this.players[playerNumber];
     const newCards = this.dealCards(number);
@@ -295,6 +319,7 @@ class Uno {
     this.drawCallback(player.socketId, newCards);
   }
 
+  // sets the next player's turn
   nextTurn() {
     this.currentPlayer = this.getNextTurn();
     // reset the player's hasDrawn flag
@@ -309,6 +334,7 @@ class Uno {
     return nextPlayer;
   }
 
+  // handles special card effects
   specialEffects(card) {
     switch (card.type) {
     case 'Skip': {
@@ -318,15 +344,16 @@ class Uno {
     case 'Reverse': {
       this.order = -this.order;
       if (this.maxPlayers == 2) {
+        // if there are only 2 players, just skip the next turn
         this.nextTurn();
       }
       break;
     }
     case 'Draw': {
+      // skip the next turn
       this.nextTurn();
-      const newCards = this.dealCards(2);
-      this.players[this.currentPlayer].hand.push(...newCards);
-      this.drawCallback(this.players[this.currentPlayer].socketId, newCards);
+      // force the next player to draw 2 cards
+      this.forcedDraw(2, this.currentPlayer);
       break;
     }
     case 'WildDraw': {
@@ -336,7 +363,7 @@ class Uno {
       // the wildDraw one from e.g. being contested for UNO
       const playerHand = [...this.players[this.lastPlayer].hand];
       this.playerHandAfterWildDraw = playerHand;
-      // calling callback to let the player know that they can contest
+      // callback to let the player know that they can contest
       this.wild4ContestCallback(this.roomName, nextPlayer.socketId);
       break;
     }
@@ -370,6 +397,7 @@ class Uno {
     }
   }
 
+  // returns list of players containing the information to update the board
   getPlayersInfo() {
     const players = [];
     for (const player of this.players) {
