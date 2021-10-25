@@ -115,7 +115,7 @@ io.on('connection', (socket) => {
     // disable waiting for said_uno and contest_uno event
     socket.removeAllListeners(['said_uno', 'contest_uno']);
     // tell the room that the uno event is done
-    io.to(roomNameSocket).emit('clearUno');
+    io.to(roomNameSocket).emit('clear_uno');
     // find the room the player was in
     const room = rooms.find((r) => r.name === roomNameSocket);
     // since the contest_uno message got here first, the player that has one card
