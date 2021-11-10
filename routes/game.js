@@ -7,6 +7,7 @@ router.post('/', function(req, res, next) {
   req.session.surname = req.body.surname;
   res.render('game', { 
     layout: 'empty', 
+    style: 'game.css',
     title: 'Game', 
     roomName: req.body.roomName, 
     name: req.session.name, 

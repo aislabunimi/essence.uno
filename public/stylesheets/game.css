@@ -1,0 +1,18 @@
+.main {
+  height:95%;
+  width: 70%;
+  float:left;
+}
+
+.jitsi {
+  height: 95%;
+  width: 30%;
+  float: right;
+}
+
+@media (prefers-color-scheme: dark) {
+  body {
+    background-color: #1c1c1e;
+    color: white;
+  }
+}
