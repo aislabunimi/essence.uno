@@ -1,3 +1,5 @@
+const config = require('../config/config');
+
 const express = require('express');
 const router = express.Router();
 
@@ -5,16 +7,16 @@ const router = express.Router();
 router.post('/', function(req, res, next) {
   req.session.name = req.body.name;
   req.session.surname = req.body.surname;
-  res.render('game', { 
-    layout: 'empty', 
+  res.render('game', {
+    layout: 'empty',
     style: 'game.css',
-    title: 'Game', 
-    roomName: req.body.roomName, 
-    name: req.session.name, 
+    title: 'Game',
+    roomName: req.body.roomName,
+    name: req.session.name,
     surname: req.session.surname,
-    color: "#ffffff",
-    jitsi_domain: "meet.jit.si",
-    cbacUrl: "https://cbac.aislab.di.unimi.it"
+    color: '#ffffff',
+    jitsi_domain: config.JITSI_INSTANCE,
+    cbacUrl: config.CBAC_HOSTNAME,
   });
 });
 module.exports = router;

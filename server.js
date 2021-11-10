@@ -1,5 +1,7 @@
+const config = require('./config/config.js');
+
 const app = require('./app');
-const port = process.env.PORT || 3000;
+const port = config.PORT;
 
 const Uno = require('./Uno');
 
@@ -177,7 +179,7 @@ io.on('connection', (socket) => {
       // delete room if empty
       if (room.players === 0) {
         room.end = Date.now();
-        console.log('Statistical info: ')
+        console.log('Statistical info: ');
         console.log('Game start: ', room.start);
         console.log('Game end: ', room.end);
         console.log('Game duration: ', room.end - room.start);

@@ -1,3 +1,5 @@
+const config = require('./config/config');
+
 const createError = require('http-errors');
 const express = require('express');
 const path = require('path');
@@ -16,7 +18,7 @@ app.set('view engine', 'hbs');
 
 // initialize session
 app.use(session({
-  secret: 'keyboard cat',
+  secret: config.COOKIE_SECRET,
   resave: true,
   saveUninitialized: true,
   cookie: {
