@@ -56,9 +56,11 @@ export default class GameScene extends Phaser.Scene {
     // console.log(window.innerWidth, window.innerHeight, window.innerWidth / window.innerHeight);
     // this.scale.displaySize.setAspectRatio(window.innerWidth / window.innerHeight);
     // this.scale.refresh();
-
-    // setting backgroun color
-    this.cameras.main.setBackgroundColor(0x1c1c1e);
+    if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      this.colorScheme = 'dark';
+    }else {
+      this.colorScheme = 'light';
+    }
 
     console.log('Creating game scene');
     console.log('Creating UIHandler');

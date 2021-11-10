@@ -3,6 +3,17 @@ import DeckCard from './cards/DeckCard.js';
 import HandCard from './cards/HandCard.js';
 import PlayedCard from './cards/PlayedCard.js';
 
+const lightColorScheme = {
+  background: '#f5f5f5',
+  text: '#1c1c1e',
+  boxText: '#1c1c1e', // used in buttons and alerts
+}
+const darkColorScheme = {
+  background: '#1c1c1e',
+  text: '#f5f5f5',
+  boxText: '#1c1c1e', // used in buttons and alerts
+}
+
 const redCardColor = 0xea323c;
 // const blueCardColor = 0x0098dc;
 // const yellowCardColor = 0xffc825;
@@ -11,6 +22,13 @@ const greyColor = 0x999999;
 
 export default class UIHandler {
   constructor(scene) {
+    if(scene.colorScheme === 'light') {
+      this.colorScheme = lightColorScheme;
+    } else {
+      this.colorScheme = darkColorScheme;
+    }
+    // setting background color
+    scene.cameras.main.setBackgroundColor(this.colorScheme.background);
 
     this.buildDropZone = () => {
       scene.dropZone = scene.add.zone(470, 300, 170, 230)
@@ -55,7 +73,7 @@ export default class UIHandler {
           700,
           50 + (player.turn * 50),
           playerText,
-          { fontStyle: 'bold', fontSize: '20px', fill: '#FFFFFF' },
+          { fontStyle: 'bold', fontSize: '20px', fill: this.colorScheme.text },
         );
         if (!player.connected) {
           this.tintRed(text);
@@ -83,7 +101,7 @@ export default class UIHandler {
         background.x + 10,
         background.y,
         text,
-        { fontStyle: 'bold', fontSize: '50px', fill: '#000000', align: 'center', wordWrap: { width: 550 } },
+        { fontStyle: 'bold', fontSize: '50px', fill: this.colorScheme.boxText, align: 'center', wordWrap: { width: 550 } },
       );
       alertBoxText.setOrigin(0.5, 0.5);
       let timeoutVar = null;
@@ -221,7 +239,7 @@ export default class UIHandler {
         button.x,
         button.y,
         textContent,
-        { fontStyle: 'bold', fontSize: '20px', fill: '#000000', align: 'center' },
+        { fontStyle: 'bold', fontSize: '20px', fill: this.colorScheme.boxText, align: 'center' },
       );
       text.setOrigin(0.5, 0.5);
       this.buttonGroup.add(text);
