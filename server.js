@@ -34,6 +34,8 @@ io.on('connection', (socket) => {
     // create a new room and add it to rooms array
     rooms.push({
       name: roomName,
+      start: Date.now(),
+      gamesPlayed: 0,
       players: 0,
       maxPlayers: maxPlayers,
       game: new Uno(
@@ -174,6 +176,12 @@ io.on('connection', (socket) => {
       io.to(room.name).emit('update_board', room.game.getPlayersInfo());
       // delete room if empty
       if (room.players === 0) {
+        room.end = Date.now();
+        console.log('Statistical info: ')
+        console.log('Game start: ', room.start);
+        console.log('Game end: ', room.end);
+        console.log('Game duration: ', room.end - room.start);
+
         console.log(room.name, ': deleted');
         rooms.splice(rooms.indexOf(room), 1);
       }
@@ -206,6 +214,8 @@ function updateRoom(room) {
 }
 
 function resetRoom(room) {
+  // update room statistics
+  room.played += 1;
   // reset the game
   room.game.reset();
   // send reset to all the players in the room

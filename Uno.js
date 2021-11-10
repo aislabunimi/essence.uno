@@ -61,6 +61,7 @@ class Uno {
     this.unoCallback = unoCallback;
     this.wild4ContestCallback = wild4ContestCallback;
     this.winCallback = winCallback;
+    this.actions = [];
   }
 
   reset() {
@@ -264,6 +265,8 @@ class Uno {
       };
     }
     if (player.hand.some(c => c.name === cardToSearchInhand.name)) {
+      // log action: discard
+      this.actions.push({action:"discard" , res: card, target: this.currentPlayer});
       // find the card in the player's hand
       const cardIndex = player.hand.findIndex(
         c => c.name === cardToSearchInhand.name,
@@ -282,6 +285,8 @@ class Uno {
       // if the player that discarded the card has no more cards,
       // the game is over and the player that won is the one that discarded
       if (player.hand.length === 0) {
+        // log action: win
+        this.actions.push({action:"win" , target: this.currentPlayer});
         player.wins++;
         this.winCallback(this.roomName, `${player.name} ${player.surname}`);
       }
@@ -293,6 +298,8 @@ class Uno {
   }
   // used when a player contest another that hasn't called UNO fast enough
   contestUno() {
+    // log action: contest uno, res contains the player that had to draw
+    this.actions.push({action:"contest uno" , target: this.lastPlayer});
     // force the last player to draw 2 cards
     this.forcedDraw(2, this.lastPlayer);
   }
@@ -308,6 +315,8 @@ class Uno {
     this.drawCallback(player.socketId, newCards);
     // set the player's hasDrawn flag to true
     player.hasDrawn = true;
+    // log action: draw
+    this.actions.push({action:"draw", res: newCards, target: this.currentPlayer});
   }
 
   // same as draw but used only for special cards effects or contesting
@@ -317,6 +326,8 @@ class Uno {
     const newCards = this.dealCards(number);
     player.hand.push(...newCards);
     this.drawCallback(player.socketId, newCards);
+    // log action: forcedDraw
+    this.actions.push({action:"forcedDraw", res: newCards, target: playerNumber});
   }
 
   // sets the next player's turn
@@ -371,6 +382,8 @@ class Uno {
   }
   contest4(contesting) {
     if (contesting) {
+      // log action: contest4
+      this.actions.push({action:"contest4", target: this.currentPlayer});
       // if the player wants to contest
       // find the top discard card when the wildDraw was played
       const lastCard = this.discarded[this.discarded.length - 2];
