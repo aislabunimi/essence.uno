@@ -1,7 +1,81 @@
-<div id="game"></div>
-
-
+<div id="main" style="height:95%; width: 70%; float:left;">
+  <div id="game"></div>
 </div>
+<div id="jitsi" style="height:95%; width: 30%; float:right;"></div>
+<div style="clear: both;"></div>
 <script src="phaser.min.js"></script>
 <script src="/socket.io/socket.io.js"></script>
 <script type="module" src="javascripts/game.js"></script>
+<script src="https://meet.jit.si/external_api.js"></script>
+<script src="https://cbac.aislab.di.unimi.it/cbac_app/js/jitsi_iframe.js"></script>
+<script>
+  /*const domain = 'meet.jit.si';
+  const options = {
+    roomName: '{{roomName}}',
+    // width: 700,
+    // height: 700,
+    parentNode: document.querySelector('#jitsi'),
+    userInfo: {
+        displayName: '{{name}} {{surname}}'
+    },
+    configOverwrite:{
+        prejoinPageEnabled: false,
+        toolbarButtons: ['microphone', 'camera'],
+        disableDeepLinking: false,
+        disableProfile: false,
+        disableTileView: false,
+        hideConferenceSubject: true,
+        hideConferenceTimer: true,
+        disableDeepLinking: true,
+        startWithVideoMuted: true,
+        disableResponsiveTiles: true,
+        defaultLanguage: 'en',
+        apiLogLevels: ['error']
+    },
+    interfaceConfigOverwrite: {
+        DISPLAY_WELCOME_FOOTER: false,
+        HIDE_INVITE_MORE_HEADER: true,
+        MOBILE_APP_PROMO: false,
+        SETTINGS_SECTIONS: [],
+        SHOW_CHROME_EXTENSION_BANNER: false,
+        SHOW_JITSI_WATERMARK: false,
+        VIDEO_QUALITY_LABEL_DISABLED: true,
+        PROVIDER_NAME: '',
+        JITSI_WATERMARK_LINK: '',
+        SHOW_WATERMARK_FOR_GUESTS: false,
+        SHOW_BRAND_WATERMARK: false,
+        DISABLE_VIDEO_BACKGROUND: true,
+        VERTICAL_FILMSTRIP: false
+    }
+  };
+const api = new JitsiMeetExternalAPI(domain, options); */
+</script>
+<script>
+  /*var cbacUrl=`https://cbac.aislab.di.unimi.it/cbac_app`;
+  var token="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImZyYW5jZXNjb3Rvcmdhbm8yIiwidXNlcmlkIjoidWZwZWhyYjFrdnQ4Z2V4aiIsImVtYWlsIjoiamJqdmN3Zm5oa0BtYWlscy5vbXZ2aW0uZWR1LmluIiwiZmlyc3RuYW1lIjoiRnJhbmNlc2NvIiwibGFzdG5hbWUiOiJUb3JnYW5vMiIsInR5cGUiOiJ1c2VyIiwidXNlcnR5cGUiOiJjb21tdW5pdHkiLCJhcHByb3ZlZCI6dHJ1ZSwiZGV2aWNlIjoiZGVmYXVsdCIsIm1vZGUiOiJkZWZhdWx0IiwiZmluZ2VycHJpbnQiOiJmYmRmOGY1OWRiYjdjMGUyNWU1MWI1NWU3YjBiOWU4YzM2NTdhMGU5NjJiNTBkZTdlZjZlZjI3YWUwM2YwZGMyIiwiaWF0IjoxNjM2NTM0NjUxfQ.mmP6tYtby03HO9cqNWRNYQ7zElvlRqwZdJ_LMy-L2XE";
+  $(document).ready(function(){
+      notificationLib.init({
+          notificationIO : true,
+          token:token,
+          cbacUrl:cbacUrl,
+          activityName: "BRISCOLA_APP",
+          activityPage: "game",
+          activityType: "game",
+          available : "false"
+      });
+  })*/
+  // TODO: get real username and replace this placeholder
+  var username= "francescotorgano"
+  var fullname= "{{name}} {{surname}}"
+  var room_name = "{{roomName}}"
+
+  local_jit.init({
+    backgroundColor: "{{color}}",
+    username: username,     //ES. mario.rossi
+    fullname: fullname,     //ES. Mario Rossi
+    room_name: room_name,
+    jitsi_domain: "{{jitsi_domain}}",
+    cbacUrl: "{{cbacUrl}}",
+  })
+
+</script>

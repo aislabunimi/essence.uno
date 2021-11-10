@@ -5,6 +5,15 @@ const router = express.Router();
 router.post('/', function(req, res, next) {
   req.session.name = req.body.name;
   req.session.surname = req.body.surname;
-  res.render('game', { layout: 'empty', title: 'Game' });
+  res.render('game', { 
+    layout: 'empty', 
+    title: 'Game', 
+    roomName: req.body.roomName, 
+    name: req.session.name, 
+    surname: req.session.surname,
+    color: "#ffffff",
+    jitsi_domain: "meet.jit.si",
+    cbacUrl: "https://cbac.aislab.di.unimi.it"
+  });
 });
 module.exports = router;
