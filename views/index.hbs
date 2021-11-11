@@ -26,6 +26,7 @@
       <button id="createRoomButton">
         Create room
       </button>
+      <input type="text" name="roomUUID" id="roomUUID" hidden />
     </form>
     <h2>Or join one that already exists</h2>
     <table id="roomTable" class="centered-table">
@@ -39,7 +40,7 @@
         <tr>
           <td>{{this.name}}</td>
           <td>{{this.players}}/{{this.maxPlayers}}</td>
-          <td><button onclick="joinRoom('{{this.name}}')">Join</button></td>
+          <td><button onclick="joinRoom('{{this.uuid}}')">Join</button></td>
         </tr>
         {{/each}}
       </tbody>

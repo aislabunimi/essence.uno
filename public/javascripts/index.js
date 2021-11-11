@@ -16,24 +16,21 @@ function createRoom() {
     // notify the server about new room
     socket.emit('create_room', roomNameInput.value, parseInt(nPlayersInput.value));
     // saving to cookies
-    document.cookie = `roomName=${roomNameInput.value}; SameSite=Strict`;
     document.cookie = `name=${document.getElementById('name').value}; SameSite=Strict`;
     document.cookie = `surname=${document.getElementById('surname').value}; SameSite=Strict`;
-    // submit form
-    document.getElementById('form').submit();
   }
 }
 
 // the user needs a name and surname to join a room
-function joinRoom(roomName) {
+function joinRoom(uuid) {
   if (document.getElementById('name').checkValidity() &&
    document.getElementById('surname').checkValidity()) {
-    // setting room name to pass it with form to game
-    roomNameInput.value = roomName;
+    // adding data to an hidden input to pass it to the server
+    document.getElementById('roomUUID').value = uuid;
     // saving to cookies
-    document.cookie = `roomName=${roomNameInput.value}; SameSite=Strict`;
     document.cookie = `name=${document.getElementById('name').value}; SameSite=Strict`;
     document.cookie = `surname=${document.getElementById('surname').value}; SameSite=Strict`;
+    document.cookie = `roomUUID=${uuid}; SameSite=Strict`;
     // submit form
     document.getElementById('form').submit();
   }
@@ -41,6 +38,12 @@ function joinRoom(roomName) {
     alert('Please enter your name and surname');
   }
 }
+socket.on('room_created', (uuid) => {
+  document.getElementById('roomUUID').value = uuid;
+  document.cookie = `roomUUID=${uuid}; SameSite=Strict`;
+  // submit form
+  document.getElementById('form').submit();
+});
 
 exports = {
   createRoom,

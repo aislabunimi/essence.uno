@@ -24,46 +24,49 @@ io.on('connection', (socket) => {
   // console.log('user connected:', socket.id);
 
   // variable to store room name
-  let roomNameSocket = '';
+  let roomUUIDSocket = '';
 
   // handling create_room event
   socket.on('create_room', (roomName, maxPlayers) => {
     console.log(roomName, ': created for', maxPlayers, 'players');
     // check if rooms contains a room with name name
-    if (rooms.find((room) => room.name === roomName)) {
+    if (rooms.find((room) => room.uuid === roomName)) {
       // if room already exists, don't create a new room
       console.log('room already exists');
       return;
     }
     // create a new room and add it to rooms array
-    rooms.push({
+    const roomUUID = uuidv4();
+    const newRoom = {
       name: roomName,
-      uuid: uuidv4(),
+      uuid: roomUUID,
       startTime: Date.now(),
       endTime: null,
       gamesPlayed: 0,
       players: 0,
       maxPlayers: maxPlayers,
       game: new Uno(
-        roomName, maxPlayers, drawCallback,
+        roomUUID, maxPlayers, drawCallback,
         unoCallback, wild4ContestCallback, winCallback),
       rounds: [],
-    });
+    };
+    rooms.push(newRoom);
+    socket.emit('room_created', newRoom.uuid);
   });
 
-  socket.on('join_room', (roomName, name, surname, uuid) => {
-    console.log(`${roomName}: joined by ${name} ${surname} (${uuid})`);
+  socket.on('join_room', (roomUUID, name, surname, uuid) => {
+    console.log(`${roomUUID}: joined by ${name} ${surname} (${uuid})`);
     // find room the user want to join
-    const room = rooms.find((r) => r.name === roomName);
+    const room = rooms.find((r) => r.uuid === roomUUID);
     if (room) {
       // user join room
-      socket.join(roomName);
+      socket.join(roomUUID);
       // saving room name
-      roomNameSocket = room.name;
+      roomUUIDSocket = roomUUID;
       // updating number of players in the room
       room.players += 1;
       // update already connected players's board
-      io.to(room.name).emit('update_board', room.game.getPlayersInfo());
+      io.to(room.uuid).emit('update_board', room.game.getPlayersInfo());
       // check if user was already in the room
       if (room.game.isAlreadyPlaying(uuid)) {
         // send event to old socket to disconnect
@@ -99,16 +102,16 @@ io.on('connection', (socket) => {
       }
     }
     else {
-      console.log(roomName, 'does not exist');
+      console.log(roomUUID, 'does not exist');
       socket.emit('room_not_found');
     }
   });
 
   socket.on('discard', card => {
     // find the room the card was discarded in
-    const room = rooms.find((r) => r.name === roomNameSocket);
+    const room = rooms.find((r) => r.uuid === roomUUIDSocket);
     // telling other players which card was discarded
-    io.to(room.name).emit('discard', card);
+    io.to(room.uuid).emit('discard', card);
     // discarding the card
     room.game.discard(card);
 
@@ -119,16 +122,16 @@ io.on('connection', (socket) => {
     // disable waiting for said_uno and contest_uno event
     socket.removeAllListeners(['said_uno', 'contest_uno']);
     // tell the room that the uno event is done
-    io.to(roomNameSocket).emit('clear_uno');
+    io.to(roomUUIDSocket).emit('clear_uno');
   });
 
   socket.on('contest_uno', () => {
     // disable waiting for said_uno and contest_uno event
     socket.removeAllListeners(['said_uno', 'contest_uno']);
     // tell the room that the uno event is done
-    io.to(roomNameSocket).emit('clear_uno');
+    io.to(roomUUIDSocket).emit('clear_uno');
     // find the room the player was in
-    const room = rooms.find((r) => r.name === roomNameSocket);
+    const room = rooms.find((r) => r.uuid === roomUUIDSocket);
     // since the contest_uno message got here first, the player that has one card
     // needs to draw 2 card
     room.game.contestUno();
@@ -141,7 +144,7 @@ io.on('connection', (socket) => {
       // clear the timeout
       clearTimeout(contest4Timeout);
       // find the room the player was in
-      const room = rooms.find((r) => r.name === roomNameSocket);
+      const room = rooms.find((r) => r.uuid === roomUUIDSocket);
       // contest4
       room.game.contest4(contesting);
 
@@ -151,7 +154,7 @@ io.on('connection', (socket) => {
 
   socket.on('draw', () => {
     // find the room the player that wants to draw is in
-    const room = rooms.find((r) => r.name === roomNameSocket);
+    const room = rooms.find((r) => r.uuid === roomUUIDSocket);
     // draw a card
     room.game.draw();
 
@@ -160,7 +163,7 @@ io.on('connection', (socket) => {
 
   socket.on('pass', () => {
     // find the room the player that wants to pass is in
-    const room = rooms.find((r) => r.name === roomNameSocket);
+    const room = rooms.find((r) => r.uuid === roomUUIDSocket);
     // pass turn
     room.game.nextTurn();
 
@@ -170,19 +173,19 @@ io.on('connection', (socket) => {
   socket.on('disconnect', () => {
     // console.log('user disconnected:', socket.id);
     // find room the user was in
-    const room = rooms.find((r) => r.name === roomNameSocket);
+    const room = rooms.find((r) => r.uuid === roomUUIDSocket);
     if (room) {
       // if room exists, remove player from room
       // room.game.removePlayer(socket.id);
       // update number of players in the room
       room.players -= 1;
       // update already connected players's board
-      // io.to(room.name).emit('update_board', room.game.getPlayersInfo());
+      // io.to(room.uuid).emit('update_board', room.game.getPlayersInfo());
       // if the room is empty, delete it
       // set him as disconnected in the game
       room.game.disconnectPlayer(socket.id);
       // update players board
-      io.to(room.name).emit('update_board', room.game.getPlayersInfo());
+      io.to(room.uuid).emit('update_board', room.game.getPlayersInfo());
       // delete room if empty
       if (room.players === 0) {
         room.rounds.push(room.game.round());
@@ -195,7 +198,7 @@ io.on('connection', (socket) => {
           room.endTime,
           room.rounds,
         );
-        console.log(room.name, ': deleted');
+        console.log(room.uuid, ': deleted');
         rooms.splice(rooms.indexOf(room), 1);
       }
       else {
@@ -218,22 +221,22 @@ function setup(game, player) {
 
 function updateRoom(room) {
   // send the room the current turn
-  io.to(room.name).emit('current_turn', room.game.currentPlayer);
+  io.to(room.uuid).emit('current_turn', room.game.currentPlayer);
   // send the current player the moves they can do
   io.to(room.game.players[room.game.currentPlayer].socketId)
     .emit('available_moves', room.game.moves());
   // send the room the current board
-  io.to(room.name).emit('update_board', room.game.getPlayersInfo());
+  io.to(room.uuid).emit('update_board', room.game.getPlayersInfo());
 }
 
 function resetRoom(room) {
   // update room statistics
-  room.played += 1;
+  room.gamesPlayed += 1;
   room.rounds.push(room.game.round());
   // reset the game
   room.game.reset();
   // send reset to all the players in the room
-  io.to(room.name).emit('reset');
+  io.to(room.uuid).emit('reset');
   // if the room is full, start the game
   if (room.game.isReady()) {
     // if the room is full, start the game
@@ -253,28 +256,28 @@ function drawCallback(socketId, newCards) {
   io.to(socketId).emit('draw', newCards);
 }
 
-function unoCallback(roomString) {
+function unoCallback(roomUUID) {
   // tell the room that one players has one card
-  io.to(roomString).emit('uno');
+  io.to(roomUUID).emit('uno');
 }
 
-function wild4ContestCallback(roomString, socketId) {
+function wild4ContestCallback(roomUUID, socketId) {
   // tell the next player that they can contest the wild 4
   io.to(socketId).emit('contest_draw_four');
   // if they doesn't answer in time, they will draw 4 cards
   contest4Timeout = setTimeout(() => {
     io.to(socketId).emit('clear_draw_four');
-    const room = rooms.find((r) => r.name === roomString);
+    const room = rooms.find((r) => r.uuid === roomUUID);
     room.game.contest4(false);
   }
   , 10000);
 }
 
-function winCallback(roomString, player) {
+function winCallback(roomUUID, player) {
   // tell the room the winner
-  io.to(roomString).emit('win', player);
+  io.to(roomUUID).emit('win', player);
   // after 5 seconds, reset the room
   setTimeout(() => {
-    resetRoom(rooms.find((room) => room.name === roomString));
+    resetRoom(rooms.find((room) => room.uuid === roomUUID));
   }, 5000);
 }

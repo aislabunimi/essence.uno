@@ -9,7 +9,7 @@ export default class GameScene extends Phaser.Scene {
 
   preload() {
     console.log('Loading info from cookies');
-    this.roomName = getCookie('roomName');
+    this.roomUUID = getCookie('roomUUID');
     this.user = {
       uuid: getCookie('uuid').slice(2),
       name: getCookie('name'),
@@ -58,7 +58,8 @@ export default class GameScene extends Phaser.Scene {
     // this.scale.refresh();
     if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
       this.colorScheme = 'dark';
-    }else {
+    }
+    else {
       this.colorScheme = 'light';
     }
 

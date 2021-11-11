@@ -46,9 +46,9 @@ for (let i = 0; i < cards.length; i++) {
 cards.splice(0, cards.length, ...debugCards); */
 
 class Uno {
-  constructor(roomName, maxPlayers, drawCallback, unoCallback,
+  constructor(roomUUID, maxPlayers, drawCallback, unoCallback,
     wild4ContestCallback, winCallback) {
-    this.roomName = roomName;
+    this.roomUUID = roomUUID;
     this.deck = this.shuffleCards([...cards]);
     this.discarded = [];
     this.players = [];
@@ -293,7 +293,7 @@ class Uno {
       // allow the player to say UNO
       // allow the other players to make him draw if they are faster.
       if (player.hand.length === 1) {
-        this.unoCallback(this.roomName);
+        this.unoCallback(this.roomUUID);
       }
       // add the card to the discard pile
       this.discarded.push(card);
@@ -307,7 +307,7 @@ class Uno {
         this.endTime = Date.now();
         this.winner = this.currentPlayer;
         player.wins++;
-        this.winCallback(this.roomName, `${player.name} ${player.surname}`);
+        this.winCallback(this.roomUUID, `${player.name} ${player.surname}`);
       }
     }
     else {
@@ -394,7 +394,7 @@ class Uno {
       const playerHand = [...this.players[this.lastPlayer].hand];
       this.playerHandAfterWildDraw = playerHand;
       // callback to let the player know that they can contest
-      this.wild4ContestCallback(this.roomName, nextPlayer.socketId);
+      this.wild4ContestCallback(this.roomUUID, nextPlayer.socketId);
       break;
     }
     }

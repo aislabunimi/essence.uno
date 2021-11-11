@@ -7,7 +7,7 @@ router.get('/', function(req, res, next) {
   res.render('index', {
     layout:'empty',
     style: 'index.css',
-    title:'Index', 
+    title:'Index',
     rooms: req.app.get('rooms'),
   });
 });
