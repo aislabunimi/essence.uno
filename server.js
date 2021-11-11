@@ -1,4 +1,6 @@
 const config = require('./config/config.js');
+const gameMongoose = require('./models/game.js');
+const { v4: uuidv4 } = require('uuid');
 
 const app = require('./app');
 const port = config.PORT;
@@ -36,13 +38,16 @@ io.on('connection', (socket) => {
     // create a new room and add it to rooms array
     rooms.push({
       name: roomName,
-      start: Date.now(),
+      uuid: uuidv4(),
+      startTime: Date.now(),
+      endTime: null,
       gamesPlayed: 0,
       players: 0,
       maxPlayers: maxPlayers,
       game: new Uno(
         roomName, maxPlayers, drawCallback,
         unoCallback, wild4ContestCallback, winCallback),
+      rounds: [],
     });
   });
 
@@ -81,6 +86,8 @@ io.on('connection', (socket) => {
       // adding player to game
       room.game.addPlayer(socket.id, name, surname, uuid);
       if (room.game.isReady()) {
+        // save the players uuids
+        room.playersUUIDs = room.game.getPlayersUUID();
         // if the room is full, start the game
         room.game.start();
         // setup game for all players
@@ -178,12 +185,16 @@ io.on('connection', (socket) => {
       io.to(room.name).emit('update_board', room.game.getPlayersInfo());
       // delete room if empty
       if (room.players === 0) {
-        room.end = Date.now();
-        console.log('Statistical info: ');
-        console.log('Game start: ', room.start);
-        console.log('Game end: ', room.end);
-        console.log('Game duration: ', room.end - room.start);
-
+        room.rounds.push(room.game.round());
+        room.endTime = Date.now();
+        console.log('Saving game data on db');
+        gameMongoose.insertNewGame(
+          room.uuid,
+          room.playersUUIDs,
+          room.startTime,
+          room.endTime,
+          room.rounds,
+        );
         console.log(room.name, ': deleted');
         rooms.splice(rooms.indexOf(room), 1);
       }
@@ -218,6 +229,7 @@ function updateRoom(room) {
 function resetRoom(room) {
   // update room statistics
   room.played += 1;
+  room.rounds.push(room.game.round());
   // reset the game
   room.game.reset();
   // send reset to all the players in the room

@@ -61,6 +61,9 @@ class Uno {
     this.unoCallback = unoCallback;
     this.wild4ContestCallback = wild4ContestCallback;
     this.winCallback = winCallback;
+    this.startTime = null;
+    this.endTime = null;
+    this.winner = null;
     this.actions = [];
   }
 
@@ -72,6 +75,10 @@ class Uno {
     this.lastWildColor = null;
     this.lastPlayer = null;
     this.order = 1;
+    this.startTime = null;
+    this.endTime = null;
+    this.winner = null;
+    this.actions = [];
     for (const player of this.players) {
       player.hand = [];
     }
@@ -98,6 +105,9 @@ class Uno {
   // get a player from their socketId
   getPlayerSocketId(socketId) {
     return this.players.find(player => player.socketId === socketId);
+  }
+  getPlayersUUID() {
+    return this.players.map(player => player.uuid);
   }
 
   // check if a player is already in the game, given a uuid
@@ -162,6 +172,8 @@ class Uno {
       }
       // shuffle the deck and the discard pile
       this.deck = this.shuffleCards([...this.deck, ...this.discarded]);
+      // log: deck shuffle with discard pile
+      this.actions.push({ action:'deck_shuffle_discard_pile', res: this.deck });
       // add the last card of the discard pile back to the discard pile
       this.discarded = [lastCard];
     }
@@ -172,6 +184,9 @@ class Uno {
 
   // initialized the game
   start() {
+    // log: deck
+    this.actions.push({ action:'deck start', res: this.deck });
+    this.startTime = Date.now();
     // deal the cards to the players
     this.players.forEach(player => {
       player.hand = this.dealCards(7);
@@ -183,6 +198,8 @@ class Uno {
       console.log('first card is WildDraw, reshuffling');
       this.deck.unshift(firstDiscard);
       this.deck = this.shuffleCards([...this.deck]);
+      // log: deck shuffle cause of wild_draw
+      this.actions.push({ action:'deck_shuffle_wild_draw', res: this.deck });
       firstDiscard = this.deck.shift();
     }
     // If the first has any special effect, they will be applied
@@ -287,6 +304,8 @@ class Uno {
       if (player.hand.length === 0) {
         // log action: win
         this.actions.push({ action:'win', target: this.currentPlayer });
+        this.endTime = Date.now();
+        this.winner = this.currentPlayer;
         player.wins++;
         this.winCallback(this.roomName, `${player.name} ${player.surname}`);
       }
@@ -424,6 +443,15 @@ class Uno {
       });
     }
     return players;
+  }
+
+  round() {
+    return {
+      startTime: this.startTime,
+      endTime: this.endTime,
+      winner: this.winner,
+      log: this.actions,
+    };
   }
 }
 module.exports = Uno;
