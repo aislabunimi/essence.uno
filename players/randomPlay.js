@@ -1,5 +1,4 @@
 function chooseAction(gameState, availableMoves) {
-  console.log('availableMoves: ' + JSON.stringify(availableMoves, null, 2));
   // find the moves with type play
   const playMoves = availableMoves.filter(move => move.type === 'Play');
   if (playMoves.length > 0) {
