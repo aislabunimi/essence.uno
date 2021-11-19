@@ -6,6 +6,7 @@ const app = require('./app');
 const port = config.PORT;
 
 const Uno = require('./Uno');
+const UnoSP = require('./UnoSP');
 
 const server = app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
@@ -26,8 +27,8 @@ io.on('connection', (socket) => {
   // variable to store room name
   let roomUUIDSocket = '';
 
-  // handling create_room event
-  socket.on('create_room', (roomName, maxPlayers) => {
+  // handling create_room_multiplayer event
+  socket.on('create_room_multiplayer', (roomName, maxPlayers) => {
     console.log(roomName, ': created for', maxPlayers, 'players');
     // check if rooms contains a room with name name
     if (rooms.find((room) => room.uuid === roomName)) {
@@ -40,6 +41,7 @@ io.on('connection', (socket) => {
     const newRoom = {
       name: roomName,
       uuid: roomUUID,
+      type: 'multiplayer',
       startTime: Date.now(),
       endTime: null,
       gamesPlayed: 0,
@@ -48,6 +50,26 @@ io.on('connection', (socket) => {
       game: new Uno(
         roomUUID, maxPlayers, drawCallback,
         unoCallback, wild4ContestCallback, winCallback),
+      rounds: [],
+    };
+    rooms.push(newRoom);
+    socket.emit('room_created', newRoom.uuid);
+  });
+  socket.on('create_room_singleplayer', (roomName, difficulty) => {
+    console.log(roomName, ': created singleplayer room with', difficulty, 'difficulty');
+    // create a new room and add it to rooms array
+    const roomUUID = uuidv4();
+    const newRoom = {
+      name: roomName,
+      uuid: roomUUID,
+      type: 'singleplayer',
+      startTime: Date.now(),
+      endTime: null,
+      gamesPlayed: 0,
+      players: 0,
+      maxPlayers: 2,
+      game: new UnoSP(
+        roomUUID, 2, drawCallback, winCallback, difficulty),
       rounds: [],
     };
     rooms.push(newRoom);
@@ -75,7 +97,9 @@ io.on('connection', (socket) => {
         const player = room.game.reconnectPlayer(socket.id, uuid);
         if (room.game.started) {
           setup(room.game, player);
-          updateRoom(room);
+          updateBoard(room);
+          updateTurn(room);
+          updateMoves(room);
         }
         return;
       }
@@ -98,7 +122,9 @@ io.on('connection', (socket) => {
           setup(room.game, player);
         }
         // update room
-        updateRoom(room);
+        updateBoard(room);
+        updateTurn(room);
+        updateMoves(room);
       }
     }
     else {
@@ -115,7 +141,9 @@ io.on('connection', (socket) => {
     // discarding the card
     room.game.discard(card);
 
-    updateRoom(room);
+    updateBoard(room);
+    updateTurn(room);
+    updateMoves(room);
   });
 
   socket.on('said_uno', () => {
@@ -135,7 +163,7 @@ io.on('connection', (socket) => {
     // since the contest_uno message got here first, the player that has one card
     // needs to draw 2 card
     room.game.contestUno();
-    updateRoom(room);
+    updateBoard(room);
   });
 
   socket.on('contest_4', (contesting) => {
@@ -148,17 +176,22 @@ io.on('connection', (socket) => {
       // contest4
       room.game.contest4(contesting);
 
-      updateRoom(room);
+      updateBoard(room);
+      updateTurn(room);
+      updateMoves(room);
     }
   });
 
   socket.on('draw', () => {
     // find the room the player that wants to draw is in
     const room = rooms.find((r) => r.uuid === roomUUIDSocket);
+    // telling other players that someone drew a card
+    io.to(room.uuid).emit('drew');
     // draw a card
     room.game.draw();
 
-    updateRoom(room);
+    updateBoard(room);
+    updateMoves(room);
   });
 
   socket.on('pass', () => {
@@ -167,7 +200,9 @@ io.on('connection', (socket) => {
     // pass turn
     room.game.nextTurn();
 
-    updateRoom(room);
+    updateBoard(room);
+    updateMoves(room);
+    updateTurn(room);
   });
 
   socket.on('disconnect', () => {
@@ -194,6 +229,7 @@ io.on('connection', (socket) => {
         gameMongoose.insertNewGame(
           room.uuid,
           room.playersUUIDs,
+          room.type,
           room.startTime,
           room.endTime,
           room.rounds,
@@ -219,14 +255,18 @@ function setup(game, player) {
   );
 }
 
-function updateRoom(room) {
+function updateBoard(room) {
+  // send the room the current board
+  io.to(room.uuid).emit('update_board', room.game.getPlayersInfo());
+}
+function updateTurn(room) {
   // send the room the current turn
   io.to(room.uuid).emit('current_turn', room.game.currentPlayer);
+}
+function updateMoves(room) {
   // send the current player the moves they can do
   io.to(room.game.players[room.game.currentPlayer].socketId)
     .emit('available_moves', room.game.moves());
-  // send the room the current board
-  io.to(room.uuid).emit('update_board', room.game.getPlayersInfo());
 }
 
 function resetRoom(room) {
@@ -246,7 +286,9 @@ function resetRoom(room) {
       setup(room.game, player);
     }
     // update room
-    updateRoom(room);
+    updateBoard(room);
+    updateMoves(room);
+    updateTurn(room);
   }
 }
 
