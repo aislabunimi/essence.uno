@@ -1,7 +1,7 @@
 const Random = require('./random');
 const RandomPlay = require('./randomPlay');
 const Greedy = require('./greedy');
-
+const GreedyMiniMax = require('./greedyMiniMax');
 
 function create(roomUUID, difficulty, seed, deck) {
   switch (difficulty) {
@@ -16,6 +16,11 @@ function create(roomUUID, difficulty, seed, deck) {
   case 'Greedy':
     console.log('creating greedy player');
     return new Player(roomUUID, difficulty, seed, deck, Greedy.chooseAction);
+  case 'GreedyMiniMax':
+    console.log('creating greedyMiniMax player');
+    return new Player(
+      roomUUID, difficulty, seed, deck, GreedyMiniMax.chooseAction,
+    );
   default:
     break;
   }

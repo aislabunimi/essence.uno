@@ -75,6 +75,7 @@ class GameState {
   }
 
   availableActions() {
+    if (this.isFinal()) return [];
     const hand = this.hands[this.turn];
     const discard = this.discarded[this.discarded.length - 1];
     const drawable = this.dealCards(1);
@@ -127,7 +128,7 @@ class GameState {
   }
 
   isFinal() {
-    return this.myCards.length === 0 || this.opponentCards.length === 0;
+    return this.hands[0].length === 0 || this.hands[1].length === 0;
   }
 
   cardSpecialEffect(card) {
