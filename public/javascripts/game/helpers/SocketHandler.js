@@ -74,4 +74,7 @@ export default class SocketHandler {
   contest4(bool) {
     this.socket.emit('contest_4', bool);
   }
+  feedback(k, v) {
+    this.socket.emit('feedback', k, v);
+  }
 }

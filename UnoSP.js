@@ -66,6 +66,7 @@ class UnoSP {
     this.endTime = null;
     this.winner = null;
     this.actions = [];
+    this.feedback = [];
     this.bots = [
       CPUPlayer.create(
         roomUUID,
@@ -88,6 +89,7 @@ class UnoSP {
     this.endTime = null;
     this.winner = null;
     this.actions = [];
+    this.feedback = [];
     for (const player of this.players) {
       player.hand = [];
     }
@@ -425,6 +427,10 @@ class UnoSP {
     }
   }
 
+  giveFeedback(k, v) {
+    this.feedback.push({ k, v });
+  }
+
   // returns list of players containing the information to update the board
   getPlayersInfo() {
     const players = [];
@@ -447,6 +453,7 @@ class UnoSP {
       endTime: this.endTime,
       seed: this.seed,
       winner: this.winner,
+      feedback: this.feedback,
       log: this.actions,
     };
   }

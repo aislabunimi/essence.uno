@@ -62,7 +62,7 @@ io.on('connection', (socket) => {
     const newRoom = {
       name: roomName,
       uuid: roomUUID,
-      type: 'singleplayer',
+      type: 'singleplayer' + ' ' + difficulty,
       startTime: Date.now(),
       endTime: null,
       gamesPlayed: 0,
@@ -205,6 +205,12 @@ io.on('connection', (socket) => {
     updateMoves(room);
   });
 
+  socket.on('feedback', (k, v) => {
+    // find the room the player that wants to pass is in
+    const room = rooms.find((r) => r.uuid === roomUUIDSocket);
+    room.game.giveFeedback(k, v);
+  });
+
   socket.on('disconnect', () => {
     // console.log('user disconnected:', socket.id);
     // find room the user was in
@@ -321,5 +327,5 @@ function winCallback(roomUUID, player) {
   // after 5 seconds, reset the room
   setTimeout(() => {
     resetRoom(rooms.find((room) => room.uuid === roomUUID));
-  }, 5000);
+  }, 25000);
 }

@@ -47,6 +47,9 @@ export default class GameScene extends Phaser.Scene {
       contest4: 'Contest +4?',
       disconnected: 'You were disconnected',
       full: 'The room is full',
+      funFeedback: 'Was the game fun?',
+      hardFeedback: 'Was the game hard?',
+      restartSoon: 'The game will restart soon',
       end: 'won!',
     };
 

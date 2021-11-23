@@ -6,13 +6,15 @@ import PlayedCard from './cards/PlayedCard.js';
 const lightColorScheme = {
   background: '#f5f5f5',
   text: '#1c1c1e',
-  boxText: '#1c1c1e', // used in buttons and alerts
-}
+  // used in buttons and alerts
+  boxText: '#1c1c1e',
+};
 const darkColorScheme = {
   background: '#1c1c1e',
   text: '#f5f5f5',
-  boxText: '#1c1c1e', // used in buttons and alerts
-}
+  // used in buttons and alerts
+  boxText: '#1c1c1e',
+};
 
 const redCardColor = 0xea323c;
 // const blueCardColor = 0x0098dc;
@@ -22,9 +24,10 @@ const greyColor = 0x999999;
 
 export default class UIHandler {
   constructor(scene) {
-    if(scene.colorScheme === 'light') {
+    if (scene.colorScheme === 'light') {
       this.colorScheme = lightColorScheme;
-    } else {
+    }
+    else {
       this.colorScheme = darkColorScheme;
     }
     // setting background color
@@ -86,7 +89,6 @@ export default class UIHandler {
       if (scene.alertBoxGroup) scene.alertBoxGroup.clear(true, true);
       if (scene.playerHandGroup) {
         for (const card of scene.playerHandGroup.getChildren()) {
-          console.log('disabling', card);
           card.disableInteractive();
         }
       }

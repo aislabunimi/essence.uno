@@ -55,6 +55,7 @@ export default class GameHandler {
         );
       }
     };
+
     this.discardClient = (card) => {
       // callback used when a wild card is discarded
       const discardCallBack = (choice) => {
@@ -91,6 +92,7 @@ export default class GameHandler {
         scene.UIHandler.addCardPlayerHand(card);
       }
     };
+
     this.drawClient = () => {
       if (this.myTurn === this.currentTurn && this.availableMoves.includes('Draw')) {
         scene.SocketHandler.drawCard();
@@ -100,6 +102,7 @@ export default class GameHandler {
         });
       }
     };
+
     this.uno = () => {
       if (this.isMyTurn() && scene.playerHandGroup.getChildren().length === 1) {
         scene.UIHandler.showButton(scene.strings.uno, () => {
@@ -113,6 +116,7 @@ export default class GameHandler {
         });
       }
     };
+
     this.clearUno = () => {
       scene.UIHandler.hideButton();
     };
@@ -131,6 +135,7 @@ export default class GameHandler {
         10000,
       );
     };
+
     this.clearDrawFour = () => {
       scene.UIHandler.hideAlertBox();
     };
@@ -143,18 +148,62 @@ export default class GameHandler {
       this.currentTurn = turn;
       scene.UIHandler.updateTurn(this.isMyTurn());
     };
+
     this.updatePlayersBoard = (board) => {
       scene.UIHandler.updatePlayersBoard(board);
     };
+
     this.win = (winner) => {
       scene.UIHandler.buildAlertBox(`${winner} ${scene.strings.end}`);
+      setTimeout(() => {
+        this.funFeedback();
+      }, 5000);
     };
+
+    this.funFeedback = () => {
+      scene.UIHandler.hideAlertBox();
+      scene.UIHandler.buildAlertBox(
+        scene.strings.funFeedback,
+        () => {
+          scene.SocketHandler.feedback('fun', true);
+          this.hardFeedback();
+        },
+        () => {
+          scene.SocketHandler.feedback('fun', false);
+          this.hardFeedback();
+        },
+        10000,
+      );
+    };
+
+    this.hardFeedback = () => {
+      scene.UIHandler.hideAlertBox();
+      scene.UIHandler.buildAlertBox(
+        scene.strings.hardFeedback,
+        () => {
+          scene.SocketHandler.feedback('hard', true);
+          this.restartSoon();
+        },
+        () => {
+          scene.SocketHandler.feedback('hard', false);
+          this.restartSoon();
+        },
+        10000,
+      );
+    };
+
+    this.restartSoon = () => {
+      scene.UIHandler.hideAlertBox();
+      scene.UIHandler.buildAlertBox(scene.strings.restartSoon);
+    };
+
     this.reset = () => {
       this.myTurn = null;
       this.currentTurn = null;
       this.availableMoves = [];
       scene.UIHandler.reset();
     };
+
     this.full = () => {
       scene.UIHandler.buildAlertBox(scene.strings.full);
       setTimeout(() => {
@@ -162,6 +211,7 @@ export default class GameHandler {
       }
       , 3000);
     };
+
     this.disconnect = () => {
       scene.UIHandler.buildAlertBox(scene.strings.disconnected, null, null);
       setTimeout(() => {
