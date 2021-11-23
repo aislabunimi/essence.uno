@@ -238,9 +238,9 @@ class GameState {
         }
       }
       // shuffle the deck and the discard pile
-      const clearDiscarded = this.discarded.map(c => this.clearWildCard(c));
+      const clearedDiscard = this.discarded.map(c => this.decolorWildCard(c));
       this.deck = this.shuffleCardsSeeded(
-        [...this.deck, ...clearDiscarded],
+        [...this.deck, ...clearedDiscard],
         this.seed,
       );
       // add the last card of the discard pile back to the discard pile
