@@ -172,7 +172,7 @@ export default class GameHandler {
           scene.SocketHandler.feedback('fun', false);
           this.hardFeedback();
         },
-        10000,
+        8000,
       );
     };
 
@@ -188,7 +188,7 @@ export default class GameHandler {
           scene.SocketHandler.feedback('hard', false);
           this.restartSoon();
         },
-        10000,
+        8000,
       );
     };
 
