@@ -97,8 +97,8 @@ io.on('connection', (socket) => {
         const player = room.game.reconnectPlayer(socket.id, uuid);
         if (room.game.started) {
           setup(room.game, player);
-          updateBoard(room);
           updateTurn(room);
+          updateBoard(room);
           updateMoves(room);
         }
         return;
@@ -122,8 +122,8 @@ io.on('connection', (socket) => {
           setup(room.game, player);
         }
         // update room
-        updateBoard(room);
         updateTurn(room);
+        updateBoard(room);
         updateMoves(room);
       }
     }
@@ -141,8 +141,8 @@ io.on('connection', (socket) => {
     // discarding the card
     room.game.discard(card);
 
-    updateBoard(room);
     updateTurn(room);
+    updateBoard(room);
     updateMoves(room);
   });
 
@@ -176,8 +176,8 @@ io.on('connection', (socket) => {
       // contest4
       room.game.contest4(contesting);
 
-      updateBoard(room);
       updateTurn(room);
+      updateBoard(room);
       updateMoves(room);
     }
   });
@@ -200,9 +200,9 @@ io.on('connection', (socket) => {
     // pass turn
     room.game.nextTurn();
 
+    updateTurn(room);
     updateBoard(room);
     updateMoves(room);
-    updateTurn(room);
   });
 
   socket.on('disconnect', () => {
@@ -286,9 +286,9 @@ function resetRoom(room) {
       setup(room.game, player);
     }
     // update room
+    updateTurn(room);
     updateBoard(room);
     updateMoves(room);
-    updateTurn(room);
   }
 }
 
