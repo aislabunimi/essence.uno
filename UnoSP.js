@@ -52,7 +52,7 @@ class UnoSP {
   constructor(roomUUID, maxPlayers, drawCallback, winCallback, difficulty) {
     this.roomUUID = roomUUID;
     this.seed = uuidv4();
-    this.rng = seedrandom(seed);
+    this.rng = seedrandom(this.seed);
     this.currentRNG = this.rng();
     this.deck = this.shuffleCardsSeeded([...cards], this.currentRNG);
     this.discarded = [];
