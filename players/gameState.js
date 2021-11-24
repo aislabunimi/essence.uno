@@ -42,7 +42,7 @@ class GameState {
       case 'Draw_Pass': {
         const draw = this.dealCards(1);
         // add card to current player hand
-        this.hands[this.turn].push(draw[0]);
+        this.hands[this.turn].push(...draw);
         // progress turn
         this.turn = this.nextTurn();
         break;
@@ -124,6 +124,10 @@ class GameState {
   eval() {
     const myScore = this.hands[0].length;
     const opponentScore = this.hands[1].length;
+    /* if (this.isFinal()) {
+      if (myScore > opponentScore) return 100;
+      if (myScore < opponentScore) return -100;
+    } */
     return myScore - opponentScore;
   }
 
