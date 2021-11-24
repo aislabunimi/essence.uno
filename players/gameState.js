@@ -6,6 +6,8 @@ class GameState {
     this.seed = seed;
     this.turn = turn;
     this.action = action;
+    this.rng = seedrandom(seed);
+    this.currentRNG = this.rng();
 
     // deal cards for the 2 players
     if (!hands) {
@@ -21,7 +23,8 @@ class GameState {
       let firstDiscard = this.deck.shift();
       while (firstDiscard.type === 'WildDraw') {
         this.deck.unshift(firstDiscard);
-        this.deck = this.shuffleCardsSeeded([...this.deck], this.seed);
+        this.currentRNG = this.rng();
+        this.deck = this.shuffleCardsSeeded([...this.deck], this.currentRNG);
         firstDiscard = this.deck.shift();
       }
       this.discarded = [firstDiscard];
@@ -122,13 +125,8 @@ class GameState {
   }
 
   eval() {
-    const myScore = this.hands[0].length;
-    const opponentScore = this.hands[1].length;
-    /* if (this.isFinal()) {
-      if (myScore > opponentScore) return 100;
-      if (myScore < opponentScore) return -100;
-    } */
-    return myScore - opponentScore;
+    const value = this.hands[0].length - this.hands[1].length;
+    return value;
   }
 
   isFinal() {

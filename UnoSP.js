@@ -52,7 +52,9 @@ class UnoSP {
   constructor(roomUUID, maxPlayers, drawCallback, winCallback, difficulty) {
     this.roomUUID = roomUUID;
     this.seed = uuidv4();
-    this.deck = this.shuffleCardsSeeded([...cards], this.seed);
+    this.rng = seedrandom(seed);
+    this.currentRNG = this.rng();
+    this.deck = this.shuffleCardsSeeded([...cards], this.currentRNG);
     this.discarded = [];
     this.players = [];
     this.currentPlayer = 0;
@@ -72,14 +74,14 @@ class UnoSP {
         roomUUID,
         difficulty,
         this.seed,
-        this.shuffleCardsSeeded([...cards], this.seed),
+        this.shuffleCardsSeeded([...cards], this.currentRNG),
       ),
     ];
   }
 
   reset() {
-    this.seed = uuidv4();
-    this.deck = this.shuffleCardsSeeded([...cards], this.seed);
+    this.currentRNG = this.rng();
+    this.deck = this.shuffleCardsSeeded([...cards], this.currentRNG);
     this.discarded = [];
     this.currentPlayer = 0;
     this.started = false;
@@ -96,7 +98,7 @@ class UnoSP {
     }
     for (const bot of this.bots) {
       bot.reset(this.seed,
-        this.shuffleCardsSeeded([...cards], this.seed));
+        this.shuffleCardsSeeded([...cards], this.currentRNG));
     }
   }
 
@@ -244,7 +246,8 @@ class UnoSP {
     while (firstDiscard.type === 'WildDraw') {
       console.log('first card is WildDraw, reshuffling');
       this.deck.unshift(firstDiscard);
-      this.deck = this.shuffleCards([...this.deck], this.seed);
+      this.currentRNG = this.rng();
+      this.deck = this.shuffleCards([...this.deck], this.currentRNG);
       firstDiscard = this.deck.shift();
     }
     // If the first has any special effect, they will be applied
