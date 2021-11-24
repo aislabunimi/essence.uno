@@ -71,7 +71,8 @@ class UnoSP {
       CPUPlayer.create(
         roomUUID,
         difficulty,
-        this.seed, this.shuffleCardsSeeded([...cards], this.seed),
+        this.seed,
+        this.shuffleCardsSeeded([...cards], this.seed),
       ),
     ];
   }
@@ -94,7 +95,8 @@ class UnoSP {
       player.hand = [];
     }
     for (const bot of this.bots) {
-      bot.reset(this.seed, this.shuffleCardsSeeded([...cards], this.seed));
+      bot.reset(this.seed,
+        this.shuffleCardsSeeded([...cards], this.seed));
     }
   }
 
@@ -197,21 +199,28 @@ class UnoSP {
     return array;
   }
 
+  decolorWildCard(card) {
+    if (card.type === 'WildDraw' || card.type === 'Wild') {
+      return {
+        type: card.type,
+        name: `Blank_${card.type}`,
+        color: 'Blank',
+      };
+    }
+    else {
+      return card;
+    }
+  }
+
   // returns an array of cards taken from this.deck
   dealCards(cardsNumber) {
     if (cardsNumber > this.deck.length) {
       // keep the last card from the discard pile
       const lastCard = this.discarded.pop();
-      // clean the discard pile from colored wild cards
-      for (const card of this.discarded) {
-        if (card.type === 'Wild' || card.type === 'WildDraw') {
-          card.color = 'Blank';
-          card.name = 'Blank_' + card.type;
-        }
-      }
       // shuffle the deck and the discard pile
+      const clearedDiscard = this.discarded.map(c => this.decolorWildCard(c));
       this.deck = this.shuffleCardsSeeded(
-        [...this.deck, ...this.discarded],
+        [...this.deck, ...clearedDiscard],
         this.seed,
       );
       // add the last card of the discard pile back to the discard pile
@@ -244,7 +253,6 @@ class UnoSP {
     this.players[this.currentPlayer].hand.push(firstDiscard);
     // discard the first card
     this.discard(firstDiscard);
-    this.discarded.push(firstDiscard);
     // set the game started flag to true
     this.started = true;
   }
@@ -343,6 +351,13 @@ class UnoSP {
     else {
       console.log('card not found while discarding');
     }
+    /* console.log(this.bots[0].gameState.deck);
+    console.log(this.deck); */
+    /*
+    console.log(
+      JSON.stringify(this.bots[0].gameState.deck) == JSON.stringify(this.deck));
+    console.log(this.bots[0].gameState.deck.length == this.deck.length);
+    */
     this.nextTurn();
   }
 

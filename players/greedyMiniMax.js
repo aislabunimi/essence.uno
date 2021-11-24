@@ -3,7 +3,7 @@ const maxDepth = 6;
 function chooseAction(gameState, availableMoves) {
 
   const rewardMovesList = [];
-  console.log(gameState.hands[0]);
+  // console.log(gameState.hands[0]);
   for (const m of availableMoves) {
     const result = chooseActionReward(gameState, m, gameState.turn, 0, [m]);
     rewardMovesList.push(result);

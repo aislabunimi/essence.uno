@@ -231,7 +231,6 @@ class Uno {
     this.players[this.currentPlayer].hand.push(firstDiscard);
     // discard the first card
     this.discard(firstDiscard);
-    this.discarded.push(firstDiscard);
     // set the game started flag to true
     this.started = true;
   }

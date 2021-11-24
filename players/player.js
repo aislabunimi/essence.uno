@@ -107,6 +107,7 @@ class Player {
         }, 1000);
 
         this.gameState = this.gameState.nextState(move);
+        // console.log(this.gameState.deck.length);
 
         /* if (move.type === 'Draw_Play' || move.type === 'Draw_Pass') {
           const hand = this.gameState.hands[0];

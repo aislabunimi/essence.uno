@@ -49,10 +49,10 @@ class GameState {
       }
       case 'Draw_Play': {
         this.dealCards(1);
-        // apply special card effects
-        this.cardSpecialEffect(this.action.card);
         // discard card
         this.discarded.push(this.action.card);
+        // apply special card effects
+        this.cardSpecialEffect(this.action.card);
         // progress turn
         this.turn = this.nextTurn();
         break;
@@ -63,10 +63,10 @@ class GameState {
         const decoloredCard = this.decolorWildCard(this.action.card);
         const cardIndex = hand.findIndex(c => c.name === decoloredCard.name);
         hand.splice(cardIndex, 1);
-        // apply special card effects
-        this.cardSpecialEffect(this.action.card);
         // discard card
         this.discarded.push(this.action.card);
+        // apply special card effects
+        this.cardSpecialEffect(this.action.card);
         // progress turn
         this.turn = this.nextTurn();
       }
@@ -167,6 +167,7 @@ class GameState {
 
   // checks if a card is playable given the card and the discarded card
   cardIsPlayable(card, lastCard) {
+    if (!card || !lastCard) return false;
     if (card.type === lastCard.type ||
       card.color === lastCard.color) {
       // if the card is of the correct color or type, it can be played
@@ -230,13 +231,6 @@ class GameState {
     if (cardsNumber > this.deck.length) {
       // keep the last card from the discard pile
       const lastCard = this.discarded.pop();
-      // clean the discard pile from colored wild cards
-      for (const card of this.discarded) {
-        if (card.type === 'Wild' || card.type === 'WildDraw') {
-          card.color = 'Blank';
-          card.name = 'Blank_' + card.type;
-        }
-      }
       // shuffle the deck and the discard pile
       const clearedDiscard = this.discarded.map(c => this.decolorWildCard(c));
       this.deck = this.shuffleCardsSeeded(
