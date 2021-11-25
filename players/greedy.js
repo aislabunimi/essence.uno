@@ -4,7 +4,14 @@ function chooseAction(gameState, availableMoves) {
   for (const move of availableMoves.slice(1)) {
     const nextState = gameState.nextState(move);
     const nextEval = nextState.eval();
-    if (nextEval < currentBest) {
+
+    if (gameState.turn === 0) {
+      if (nextEval <= currentBest) {
+        currentBest = nextEval;
+        best = move;
+      }
+    }
+    else if (nextEval >= currentBest) {
       currentBest = nextEval;
       best = move;
     }
