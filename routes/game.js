@@ -8,6 +8,8 @@ router.post('/', function(req, res, next) {
   req.session.name = req.body.name;
   req.session.surname = req.body.surname;
   req.session.roomUUID = req.body.roomUUID;
+  req.session.roomType = req.body.roomType;
+
   res.render('game', {
     layout: 'empty',
     style: 'game.css',
@@ -17,6 +19,7 @@ router.post('/', function(req, res, next) {
     name: req.session.name,
     surname: req.session.surname,
     color: '#ffffff',
+    jitsi: req.session.roomType == 'multiplayer' ? true : false,
     jitsi_domain: config.JITSI_INSTANCE,
     cbacUrl: config.CBAC_HOSTNAME,
   });

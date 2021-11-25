@@ -64,18 +64,24 @@ const api = new JitsiMeetExternalAPI(domain, options); */
           available : "false"
       });
   })*/
-  // TODO: get real username and replace this placeholder
-  var username= "francescotorgano"
-  var fullname= "{{name}} {{surname}}"
-  var room_name = "{{roomUUID}}"
+  
+  const room_name = "{{roomUUID}}"
 
-  local_jit.init({
-    backgroundColor: "{{color}}",
-    username: username,     //ES. mario.rossi
-    fullname: fullname,     //ES. Mario Rossi
-    room_name: room_name,
-    jitsi_domain: "{{jitsi_domain}}",
-    cbacUrl: "{{cbacUrl}}",
-  })
+  if ({{jitsi}}) {
+    console.log('initializing jitsi')
+
+    local_jit.init({
+      backgroundColor: "{{color}}",
+      username: "{{name}}{{surname}}",     // TODO: get real username and replace this placeholder
+      fullname: "{{name}} {{surname}}",     //ES. Mario Rossi
+      jitsi_domain: "{{jitsi_domain}}",
+      cbacUrl: "{{cbacUrl}}",
+    })
+  }
+  else {
+    console.log('singleplayer game, no jitsi')
+  }
+
+  
 
 </script>
