@@ -33,7 +33,7 @@ function simGame(nextMoveP1, nextMoveP2, seed) {
   return gamestate.eval();
 }
 
-function runSimulation(P1, P2, seed, numGames) {
+function runSimulation(P1, P2, seed, numGames, printResults) {
   const rng = seedrandom(seed);
   const nextMoveP1 = P1.chooseAction;
   const nextMoveP2 = P2.chooseAction;
@@ -43,12 +43,14 @@ function runSimulation(P1, P2, seed, numGames) {
     if (result < 0) {
       wins++;
     }
-    console.log(`${i} ${result}`);
+    if (printResults) {
+      console.log(`Game ${i} result: ${result}`);
+    }
   }
   console.log('wins/numGames: ' + wins / numGames);
 }
 
-const simSeed = 'azzculo';
+const simSeed = 'seed';
 const GreedyMiniMax0 = GreedyMiniMax.chooseDepth(0);
 const GreedyMiniMax1 = GreedyMiniMax.chooseDepth(1);
 const GreedyMiniMax2 = GreedyMiniMax.chooseDepth(2);
@@ -93,11 +95,11 @@ console.log('\n GreedyMiniMax2 vs Greedy');
 runSimulation(GreedyMiniMax2, Greedy, simSeed, 100);
 
 // this takes a while
-console.log('\n GreedyMiniMax3 vs GreedyMiniMax3');
-runSimulation(GreedyMiniMax3, GreedyMiniMax3, simSeed, 100);
+/* console.log('\n GreedyMiniMax3 vs GreedyMiniMax3');
+runSimulation(GreedyMiniMax3, GreedyMiniMax3, simSeed, 100); */
 
 console.log('\n GreedyMiniMax3 vs Greedy');
-runSimulation(GreedyMiniMax3, Greedy, simSeed, 100);
+runSimulation(GreedyMiniMax3, Greedy, simSeed, 100, true);
 
 function newDeck() {
   const colors = ['Red', 'Yellow', 'Green', 'Blue'];
