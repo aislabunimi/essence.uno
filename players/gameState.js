@@ -124,13 +124,27 @@ class GameState {
     );
   }
 
-  eval() {
+  eval(player) {
+    // const value = -this.hands[0].length * a + this.hands[1].length * (1 - a);
     const value = this.hands[0].length - this.hands[1].length;
     return value;
   }
 
   isFinal() {
     return this.hands[0].length === 0 || this.hands[1].length === 0;
+  }
+
+  winner() {
+    // the winner is the one with less cards
+    if (this.hands[0].length < this.hands[1].length) {
+      return 0;
+    }
+    else if (this.hands[0].length > this.hands[1].length) {
+      return 1;
+    }
+    else {
+      return -1;
+    }
   }
 
   cardSpecialEffect(card) {

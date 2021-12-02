@@ -4,13 +4,15 @@ const Random = require('./random');
 const RandomPlay = require('./randomPlay');
 const Greedy = require('./greedy');
 const GreedyMiniMax = require('./greedyMiniMax');
+const Greedy2 = require('./greedy2');
+const GreedyMiniMax2 = require('./greedyMiniMax2');
 
 const GameState = require('./gameState');
 
 function simGame(nextMoveP1, nextMoveP2, seed) {
   let gamestate = new GameState(seed, shuffleCardsSeeded(newDeck(), seed), 0);
   let last = null;
-  // let turn = 0;
+  let turn = 0;
   let repeat = 0;
   while (!gamestate.isFinal()) {
     last = gamestate.eval();
@@ -24,13 +26,19 @@ function simGame(nextMoveP1, nextMoveP2, seed) {
     }
     // console.log(gamestate.hands[0].length + ' ' + gamestate.hands[1].length);
     gamestate = gamestate.nextState(action);
-    // turn++;
+    turn++;
     if (gamestate.eval() === last) repeat++;
     if (repeat > 100) {
+      // console.log('repeat');
       break;
     }
   }
-  return gamestate.eval();
+  return {
+    gamestate:gamestate,
+    eval: gamestate.eval(),
+    length: turn,
+    repeat: repeat === 100,
+  };
 }
 
 function runSimulation(P1, P2, seed, numGames, printResults) {
@@ -38,68 +46,78 @@ function runSimulation(P1, P2, seed, numGames, printResults) {
   const nextMoveP1 = P1.chooseAction;
   const nextMoveP2 = P2.chooseAction;
   let wins = 0;
+  let totalTurns = 0;
+  let repeats = 0;
+  // console.time('simulation');
   for (let i = 0; i < numGames; i++) {
     const result = simGame(nextMoveP1, nextMoveP2, rng());
-    if (result < 0) {
+    if (result.gamestate.winner() === 0) {
       wins++;
     }
+    if (result.repeat) {
+      repeats++;
+    }
+    totalTurns += result.length;
     if (printResults) {
-      console.log(`Game ${i} result: ${result}`);
+      console.log(`Game ${i} result: ${result.eval}, turns: ${result.length}, repeat: ${result.repeat}`);
     }
   }
-  console.log('wins/numGames: ' + wins / numGames);
+  // console.log('wins/numGames: ' + wins / numGames + ', avg game length: ' + totalTurns / numGames + ' turns' + ', repeats: ' + repeats);
+  // console.timeEnd('simulation');
+  return (wins / numGames);
 }
 
-const simSeed = 'seed';
-const GreedyMiniMax0 = GreedyMiniMax.chooseDepth(0);
-const GreedyMiniMax1 = GreedyMiniMax.chooseDepth(1);
-const GreedyMiniMax2 = GreedyMiniMax.chooseDepth(2);
-const GreedyMiniMax3 = GreedyMiniMax.chooseDepth(3);
+const simSeed = 'seed2';
+const GreedyMiniMax2_0 = GreedyMiniMax2.chooseDepth(0);
+const GreedyMiniMax2_1 = GreedyMiniMax2.chooseDepth(1);
+const GreedyMiniMax2_2 = GreedyMiniMax2.chooseDepth(2);
+const GreedyMiniMax2_3 = GreedyMiniMax2.chooseDepth(3);
 
-console.log(' Random vs Random');
-runSimulation(Random, Random, 'seed', 1000);
+const modules = [Greedy2, GreedyMiniMax2_0,
+  GreedyMiniMax2_1, GreedyMiniMax2_2, GreedyMiniMax2_3];
+const modules_names = [
+  'G2    ', 'GMM2_0', 'GMM2_1', 'GMM2_2', 'GMM2_3',
+];
+const cm = confusionMatrix(modules, modules_names, simSeed, 10);
+printConfusionMatrix(cm, modules_names);
 
-console.log('\n RandomPlay vs Random');
-runSimulation(RandomPlay, Random, 'seed', 1000);
+// create confusion matrix with each algorithm against each other
+function confusionMatrix(algorithms, algorithmsNames, seed, runs = 100) {
+  const results = [];
+  let start = process.hrtime();
+  for (let i = 0; i < algorithms.length; i++) {
+    const row = [];
+    for (let j = 0; j < algorithms.length; j++) {
+      const result = runSimulation(algorithms[i], algorithms[j], seed, runs);
+      row.push(result);
+      start = elapsed_time(start, `${algorithmsNames[i]} - ${algorithmsNames[j]}(${((i * algorithms.length) + (j + 1)) * runs}/${algorithms.length * algorithms.length * runs})`);
+    }
+    results.push(row);
+  }
+  return results;
+}
+// print confusion matrix
+function printConfusionMatrix(matrix, names) {
+  console.log('Confusion matrix:');
+  console.log('          ' + names.join(' | '));
+  for (let i = 0; i < matrix.length; i++) {
+    let string = names[i] + '  | ';
+    for (let j = 0; j < matrix[i].length; j++) {
+      string += matrix[i][j].toFixed(4) + ' | ';
+    }
+    console.log(string);
+  }
+}
 
-console.log('\n RandomPlay vs RandomPlay');
-runSimulation(RandomPlay, RandomPlay, 'seed', 1000);
 
-console.log('\n Greedy vs RandomPlay');
-runSimulation(Greedy, RandomPlay, 'seed', 1000);
-
-console.log('\n Greedy vs Greedy');
-runSimulation(Greedy, Greedy, simSeed, 1000);
-
-console.log('\n GreedyMiniMax0 vs GreedyMiniMax0');
-runSimulation(GreedyMiniMax0, GreedyMiniMax0, simSeed, 1000);
-
-console.log('\n GreedyMiniMax0 vs Greedy');
-runSimulation(GreedyMiniMax0, Greedy, simSeed, 1000);
-
-console.log('\n Greedy vs GreedyMiniMax0 ');
-runSimulation(Greedy, GreedyMiniMax0, simSeed, 1000);
-
-
-console.log('\n GreedyMiniMax1 vs GreedyMiniMax1');
-runSimulation(GreedyMiniMax1, GreedyMiniMax1, simSeed, 100);
-
-console.log('\n GreedyMiniMax1 vs Greedy');
-runSimulation(GreedyMiniMax1, Greedy, simSeed, 100);
-
-
-console.log('\n GreedyMiniMax2 vs GreedyMiniMax2');
-runSimulation(GreedyMiniMax2, GreedyMiniMax2, simSeed, 100);
-
-console.log('\n GreedyMiniMax2 vs Greedy');
-runSimulation(GreedyMiniMax2, Greedy, simSeed, 100);
-
-// this takes a while
-/* console.log('\n GreedyMiniMax3 vs GreedyMiniMax3');
-runSimulation(GreedyMiniMax3, GreedyMiniMax3, simSeed, 100); */
-
-console.log('\n GreedyMiniMax3 vs Greedy');
-runSimulation(GreedyMiniMax3, Greedy, simSeed, 100, true);
+function elapsed_time(start, note) {
+  const elapsed = process.hrtime(start);
+  const minutes = Math.floor(elapsed[0] / 60);
+  const seconds = elapsed[0] % 60;
+  const milliseconds = elapsed[1] / 1000000;
+  console.log(`${note} - ${minutes}:${seconds}.${Math.floor(milliseconds)}`);
+  return start;
+}
 
 function newDeck() {
   const colors = ['Red', 'Yellow', 'Green', 'Blue'];
