@@ -7,6 +7,8 @@ const GreedyMiniMax = require('./greedyMiniMax');
 const Greedy2 = require('./greedy2');
 const GreedyMiniMax2 = require('./greedyMiniMax2');
 
+const Evaluate = require('./evaluate');
+
 const GameState = require('./gameState');
 
 function simGame(nextMoveP1, nextMoveP2, seed) {
@@ -62,23 +64,25 @@ function runSimulation(P1, P2, seed, numGames, printResults) {
       console.log(`Game ${i} result: ${result.eval}, turns: ${result.length}, repeat: ${result.repeat}`);
     }
   }
-  // console.log('wins/numGames: ' + wins / numGames + ', avg game length: ' + totalTurns / numGames + ' turns' + ', repeats: ' + repeats);
+  console.log('wins/numGames: ' + wins / numGames + ', avg game length: ' + totalTurns / numGames + ' turns' + ', repeats: ' + repeats);
   // console.timeEnd('simulation');
   return (wins / numGames);
 }
 
-const simSeed = 'seed2';
-const GreedyMiniMax2_0 = GreedyMiniMax2.chooseDepth(0);
-const GreedyMiniMax2_1 = GreedyMiniMax2.chooseDepth(1);
-const GreedyMiniMax2_2 = GreedyMiniMax2.chooseDepth(2);
-const GreedyMiniMax2_3 = GreedyMiniMax2.chooseDepth(3);
+const alpha05 = Evaluate.setAlpha(0.5);
+const alpha075 = Evaluate.setAlpha(0.75);
+const alpha1 = Evaluate.setAlpha(1);
 
-const modules = [Greedy2, GreedyMiniMax2_0,
-  GreedyMiniMax2_1, GreedyMiniMax2_2, GreedyMiniMax2_3];
-const modules_names = [
-  'G2    ', 'GMM2_0', 'GMM2_1', 'GMM2_2', 'GMM2_3',
+const simSeed = 'seed2';
+
+const modules = [
+  GreedyMiniMax2.setDepthAndEvaluator(0, Evaluate.eval1),
+  GreedyMiniMax2.setDepthAndEvaluator(2, alpha075),
 ];
-const cm = confusionMatrix(modules, modules_names, simSeed, 10);
+const modules_names = [
+  'Greedy', 'GMMA075', 'GMM1_1', 'GMM1_2',
+];
+const cm = confusionMatrix(modules, modules_names, simSeed, 1000);
 printConfusionMatrix(cm, modules_names);
 
 // create confusion matrix with each algorithm against each other

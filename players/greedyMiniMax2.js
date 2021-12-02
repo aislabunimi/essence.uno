@@ -10,14 +10,16 @@ function evaluate(gameState, myTurn) {
   // return gameState.hands[myTurn].length;
 }
 
-function chooseAction(gameState, availableMoves, maxDepth = 1) {
+function chooseAction(
+  gameState, availableMoves, maxDepth = 1, evaluator = evaluate,
+) {
   const myTurn = gameState.turn;
   // max(x,y) = -min(-x,-y)
   const rewardMovesList = [];
   // console.log(gameState.hands[0]);
   for (const m of availableMoves) {
     const result =
-      chooseActionReward(gameState, m, myTurn, 0, maxDepth, [m]);
+      chooseActionReward(gameState, m, myTurn, 0, maxDepth, [m], evaluator);
     rewardMovesList.push(result);
   }
 
@@ -30,12 +32,14 @@ function chooseAction(gameState, availableMoves, maxDepth = 1) {
   return minReward.moves[0];
 }
 
-function chooseActionReward(gameState, move, myTurn, depth, maxDepth, moves) {
+function chooseActionReward(
+  gameState, move, myTurn, depth, maxDepth, moves, evaluator,
+) {
   const nextState = gameState.nextState(move);
   if (nextState.isFinal() || depth >= maxDepth) {
     return {
       moves: [...moves],
-      reward: evaluate(nextState, myTurn),
+      reward: evaluator(nextState, myTurn),
     };
   }
   // console.log('qui');
@@ -50,6 +54,7 @@ function chooseActionReward(gameState, move, myTurn, depth, maxDepth, moves) {
       depth + 1,
       maxDepth,
       [...moves, m],
+      evaluator,
     );
     rewardMovesList.push(result);
   }
@@ -70,7 +75,7 @@ function chooseActionReward(gameState, move, myTurn, depth, maxDepth, moves) {
   }
 }
 
-function chooseDepth(d) {
+function setDepth(d) {
   return {
     chooseAction: (gameState, availableMoves) => {
       return chooseAction(gameState, availableMoves, d);
@@ -78,8 +83,17 @@ function chooseDepth(d) {
   };
 }
 
+function setDepthAndEvaluator(d, evaluator) {
+  return {
+    chooseAction: (gameState, availableMoves) => {
+      return chooseAction(gameState, availableMoves, d, evaluator);
+    },
+  };
+}
+
 
 module.exports = {
   chooseAction,
-  chooseDepth,
+  setDepth,
+  setDepthAndEvaluator,
 };
