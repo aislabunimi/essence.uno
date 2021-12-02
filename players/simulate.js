@@ -64,9 +64,13 @@ function runSimulation(P1, P2, seed, numGames, printResults) {
       console.log(`Game ${i} result: ${result.eval}, turns: ${result.length}, repeat: ${result.repeat}`);
     }
   }
-  console.log('wins/numGames: ' + wins / numGames + ', avg game length: ' + totalTurns / numGames + ' turns' + ', repeats: ' + repeats);
+  // console.log('wins/numGames: ' + wins / numGames + ', avg game length: ' + totalTurns / numGames + ' turns' + ', repeats: ' + repeats);
   // console.timeEnd('simulation');
-  return (wins / numGames);
+  return ({
+    winsPerc: wins / numGames,
+    turnsAvg: totalTurns / numGames,
+    repeats: repeats,
+  });
 }
 
 const alpha05 = Evaluate.setAlpha(0.5);
@@ -78,11 +82,12 @@ const simSeed = 'seed2';
 const modules = [
   GreedyMiniMax2.setDepthAndEvaluator(0, Evaluate.eval1),
   GreedyMiniMax2.setDepthAndEvaluator(2, alpha075),
+  GreedyMiniMax2.setDepthAndEvaluator(2, alpha05),
 ];
 const modules_names = [
-  'Greedy', 'GMMA075', 'GMM1_1', 'GMM1_2',
+  'Greedy', 'GMMA075', 'GMMA05asdasd', 'GMM1_2',
 ];
-const cm = confusionMatrix(modules, modules_names, simSeed, 1000);
+const cm = confusionMatrix(modules, modules_names, simSeed, 10);
 printConfusionMatrix(cm, modules_names);
 
 // create confusion matrix with each algorithm against each other
@@ -102,15 +107,77 @@ function confusionMatrix(algorithms, algorithmsNames, seed, runs = 100) {
 }
 // print confusion matrix
 function printConfusionMatrix(matrix, names) {
-  console.log('Confusion matrix:');
+  // find longest name
+  let maxNameLength = 0;
+  for (let i = 0; i < names.length; i++) {
+    if (names[i].length > maxNameLength) {
+      maxNameLength = names[i].length;
+    }
+  }
+  // find longest number 
+  let maxNumberLength = 0;
+  for (let i = 0; i < matrix.length; i++) {
+    for (let j = 0; j < matrix[i].length; j++) {
+      if (matrix[i][j].winsPerc.toFixed(3).toString().length > maxNumberLength) {
+        maxNumberLength = matrix[i][j].turnsAvg.toString().length;
+      }
+    }
+  }
+
+  if (maxNumberLength > maxNameLength) {
+    maxNameLength = maxNumberLength;
+  }
+
+  // print header
+  console.log('WIN %: ');
+  let header = ' '.repeat(maxNameLength + 2);
+  for (let i = 0; i < names.length; i++) {
+    header += names[i] + ' '.repeat(maxNameLength - names[i].length + 1);
+  }
+  console.log(header);
+  // print matrix
+  for (let i = 0; i < matrix.length; i++) {
+    let row = names[i] + ' '.repeat(maxNameLength - names[i].length + 1);
+    for (let j = 0; j < matrix[i].length; j++) {
+      const number = matrix[i][j].winsPerc.toFixed(3);
+      row += ' ' + number.toString() + ' '.repeat(maxNameLength - number.toString().length);
+    }
+    console.log(row);
+  }
+
+  console.log('\nTURNS AVG:');
+  header = ' '.repeat(maxNameLength + 2);
+  for (let i = 0; i < names.length; i++) {
+    header += names[i] + ' '.repeat(maxNameLength - names[i].length + 1);
+  }
+  console.log(header);
+  // print matrix
+  for (let i = 0; i < matrix.length; i++) {
+    let row = names[i] + ' '.repeat(maxNameLength - names[i].length + 1);
+    for (let j = 0; j < matrix[i].length; j++) {
+      const number = matrix[i][j].turnsAvg.toFixed(3);
+      row += ' ' + number.toString() + ' '.repeat(maxNameLength - number.toString().length);
+    }
+    console.log(row);
+  }
+
+  /* for (let i = 0; i < matrix.length; i++) {
+    let string = names[i] + '  | ';
+    for (let j = 0; j < matrix[i].length; j++) {
+      string += matrix[i][j].winsPerc.toFixed(4) + ' | ';
+    }
+    console.log(string);
+  }
+
+  console.log('Confusion matrix average turns:');
   console.log('          ' + names.join(' | '));
   for (let i = 0; i < matrix.length; i++) {
     let string = names[i] + '  | ';
     for (let j = 0; j < matrix[i].length; j++) {
-      string += matrix[i][j].toFixed(4) + ' | ';
+      string += matrix[i][j].turnsAvg + ' | ';
     }
     console.log(string);
-  }
+  } */
 }
 
 
