@@ -2,6 +2,9 @@ const Random = require('./random');
 const RandomPlay = require('./randomPlay');
 const Greedy = require('./greedy');
 const GreedyMiniMax = require('./greedyMiniMax');
+const GreedyMiniMax2 = require('./greedyMiniMax2');
+
+const Evaluate = require('./evaluate');
 
 function create(roomUUID, difficulty, seed, deck) {
   switch (difficulty) {
@@ -21,6 +24,29 @@ function create(roomUUID, difficulty, seed, deck) {
     return new Player(
       roomUUID, difficulty, seed, deck, GreedyMiniMax.chooseAction,
     );
+  case 'GreedyMiniMax2':
+    console.log('creating greedyMiniMax2 player');
+    return new Player(
+      roomUUID, difficulty, seed, deck, GreedyMiniMax2.chooseAction,
+    );
+  case 'GreedyMiniMax2A1': {
+    console.log('creating greedyMiniMax2A1 player');
+    const depth = GreedyMiniMax2.defaultDepth();
+    const evalFun = Evaluate.setAlpha(1);
+    const chooseFun = GreedyMiniMax2.setDepthAndEvaluator(depth, evalFun);
+    return new Player(
+      roomUUID, difficulty, seed, deck, chooseFun.chooseAction,
+    );
+  }
+  case 'GreedyMiniMax2A075': {
+    console.log('creating greedyMiniMax2A075 player');
+    const depth = GreedyMiniMax2.defaultDepth();
+    const evalFun = Evaluate.setAlpha(0.75);
+    const chooseFun = GreedyMiniMax2.setDepthAndEvaluator(depth, evalFun);
+    return new Player(
+      roomUUID, difficulty, seed, deck, chooseFun.chooseAction,
+    );
+  }
   default:
     break;
   }
@@ -94,6 +120,7 @@ class Player {
         }
 
         const availableMoves = this.gameState.availableActions();
+
         const move = this.chooseAction(this.gameState, availableMoves);
         if (move.card) {
           console.log('Bot chose move: ' + move.type + ' - ' + move.card.name);

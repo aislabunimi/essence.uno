@@ -1,3 +1,7 @@
+function defaultDepth() {
+  return 5;
+}
+
 function evaluate(gameState, myTurn) {
   if (myTurn == 0) {
     // 1 - 10 = -9
@@ -11,7 +15,7 @@ function evaluate(gameState, myTurn) {
 }
 
 function chooseAction(
-  gameState, availableMoves, maxDepth = 1, evaluator = evaluate,
+  gameState, availableMoves, maxDepth = defaultDepth(), evaluator = evaluate,
 ) {
   const myTurn = gameState.turn;
   // max(x,y) = -min(-x,-y)
@@ -93,6 +97,7 @@ function setDepthAndEvaluator(d, evaluator) {
 
 
 module.exports = {
+  defaultDepth,
   chooseAction,
   setDepth,
   setDepthAndEvaluator,
