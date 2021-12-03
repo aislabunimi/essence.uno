@@ -1,5 +1,5 @@
 const seedrandom = require('seedrandom');
-const Deck = require('../utils/Deck');
+const Deck = require('../../utils/Deck');
 
 class GameState {
   constructor(seed, deck, turn, hands, discarded, action) {
@@ -81,7 +81,7 @@ class GameState {
     }
   }
 
-  availableActions() {
+  getAvailableActions() {
     if (this.isFinal()) return [];
     const hand = this.hands[this.turn];
     const discard = this.discarded[this.discarded.length - 1];
@@ -128,7 +128,7 @@ class GameState {
     );
   }
 
-  eval(player) {
+  eval() {
     // const value = -this.hands[0].length * a + this.hands[1].length * (1 - a);
     const value = this.hands[0].length - this.hands[1].length;
     return value;

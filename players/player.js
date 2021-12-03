@@ -1,50 +1,46 @@
-const Random = require('./random');
-const RandomPlay = require('./randomPlay');
-const Greedy = require('./greedy');
-const GreedyMiniMax = require('./greedyMiniMax');
-const GreedyMiniMax2 = require('./greedyMiniMax2');
+const Random = require('./algorithms/Random');
+const RandomPlay = require('./algorithms/RandomPlay');
+const Greedy = require('./algorithms/Greedy');
+const GreedyMiniMax = require('./algorithms/GreedyMiniMax');
+const GreedyMiniMax2 = require('./algorithms/GreedyMiniMax2');
 
-const Evaluate = require('./evaluate');
+const Evaluate = require('./gamestate/evaluate');
 
 function create(roomUUID, difficulty, seed, deck) {
   switch (difficulty) {
   case 'Random':
     console.log('creating random player');
-    return new Player(roomUUID, difficulty, seed, deck, Random.chooseAction);
+    return new Player(roomUUID, difficulty, seed, deck, new Random(seed));
   case 'RandomPlay':
     console.log('creating randomPlay player');
     return new Player(
-      roomUUID, difficulty, seed, deck, RandomPlay.chooseAction,
+      roomUUID, difficulty, seed, deck, new RandomPlay(seed),
     );
   case 'Greedy':
     console.log('creating greedy player');
-    return new Player(roomUUID, difficulty, seed, deck, Greedy.chooseAction);
+    return new Player(roomUUID, difficulty, seed, deck, new Greedy(seed));
   case 'GreedyMiniMax':
     console.log('creating greedyMiniMax player');
     return new Player(
-      roomUUID, difficulty, seed, deck, GreedyMiniMax.chooseAction,
+      roomUUID, difficulty, seed, deck, new GreedyMiniMax(seed, 5),
     );
   case 'GreedyMiniMax2':
     console.log('creating greedyMiniMax2 player');
     return new Player(
-      roomUUID, difficulty, seed, deck, GreedyMiniMax2.chooseAction,
+      roomUUID, difficulty, seed, deck, new GreedyMiniMax2(seed, 5),
     );
   case 'GreedyMiniMax2A1': {
     console.log('creating greedyMiniMax2A1 player');
-    const depth = GreedyMiniMax2.defaultDepth();
-    const evalFun = Evaluate.setAlpha(1);
-    const chooseFun = GreedyMiniMax2.setDepthAndEvaluator(depth, evalFun);
+    const algo = new GreedyMiniMax2(seed, 5, Evaluate.setAlpha(1));
     return new Player(
-      roomUUID, difficulty, seed, deck, chooseFun.chooseAction,
+      roomUUID, difficulty, seed, deck, algo,
     );
   }
   case 'GreedyMiniMax2A075': {
     console.log('creating greedyMiniMax2A075 player');
-    const depth = GreedyMiniMax2.defaultDepth();
-    const evalFun = Evaluate.setAlpha(0.75);
-    const chooseFun = GreedyMiniMax2.setDepthAndEvaluator(depth, evalFun);
+    const algo = new GreedyMiniMax2(seed, 5, Evaluate.setAlpha(0.75));
     return new Player(
-      roomUUID, difficulty, seed, deck, chooseFun.chooseAction,
+      roomUUID, difficulty, seed, deck, algo,
     );
   }
   default:
@@ -55,16 +51,14 @@ function create(roomUUID, difficulty, seed, deck) {
 const { io } = require('socket.io-client');
 const { v4: uuidv4 } = require('uuid');
 const config = require('../config/config.js');
-const GameState = require('./gameState');
+const GameState = require('./gamestate/gameState');
 
 class Player {
-  constructor(roomUUID, name, seed, deck, chooseAction) {
+  constructor(roomUUID, name, seed, deck, algorithm) {
     this.name = name;
-    this.chooseAction = chooseAction;
+    this.algorithm = algorithm;
 
     this.gameState = new GameState(seed, deck, 0);
-
-    console.log(this.gameState.deck.length);
 
     this.uuid = uuidv4();
     this.socket = io(config.HOSTNAME);
@@ -119,9 +113,8 @@ class Player {
           this.drew = false;
         }
 
-        const availableMoves = this.gameState.availableActions();
-
-        const move = this.chooseAction(this.gameState, availableMoves);
+        const move =
+          this.algorithm.chooseAction(this.gameState);
         if (move.card) {
           console.log('Bot chose move: ' + move.type + ' - ' + move.card.name);
         }
