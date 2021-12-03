@@ -1,52 +1,6 @@
 const seedrandom = require('seedrandom');
 const { v4: uuidv4 } = require('uuid');
-
-const colors = ['Red', 'Yellow', 'Green', 'Blue'];
-const color_types = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'Draw', 'Reverse', 'Skip'];
-const special_types = ['Wild', 'WildDraw'];
-const cards = [];
-for (const color of colors) {
-  for (const type of color_types) {
-    // In uno deck you have 2 copies of every number expect for 0
-    const newCard = {
-      name: `${color}_${type}`,
-      color: color,
-      type: type,
-    };
-    if (type !== '0') {
-      cards.push(newCard);
-    }
-    cards.push(newCard);
-  }
-}
-// add 4 of each special cards
-for (const type of special_types) {
-  const newCard = {
-    name: `Blank_${type}`,
-    color: 'Blank',
-    type: type,
-  };
-  for (let i = 0; i < 4; i++) {
-    cards.push(newCard);
-  }
-}
-// debugging cards
-/* debugCards = [];
-for (let i = 0; i < cards.length; i++) {
-  if (i === 1 || i == 2) {
-    const color = 'Red';
-    const type = 'Draw';
-    debugCards.push({
-      name: `${color}_${type}`,
-      color: color,
-      type: type,
-    });
-  }
-  else {
-    debugCards.push(cards[i]);
-  }
-}
-cards.splice(0, cards.length, ...debugCards); */
+const Deck = require('./utils/Deck');
 
 class Uno {
   constructor(roomUUID, maxPlayers, drawCallback, unoCallback,
@@ -55,7 +9,7 @@ class Uno {
     this.seed = uuidv4();
     this.rng = seedrandom(this.seed);
     this.currentRNG = this.rng();
-    this.deck = this.shuffleCardsSeeded([...cards], this.currentRNG);
+    this.deck = Deck.shuffleCardsSeeded(Deck.createDeck(), this.currentRNG);
     this.discarded = [];
     this.players = [];
     this.currentPlayer = 0;
@@ -76,7 +30,7 @@ class Uno {
 
   reset() {
     this.currentRNG = this.rng();
-    this.deck = this.shuffleCardsSeeded([...cards], this.currentRNG);
+    this.deck = Deck.shuffleCardsSeeded(Deck.createDeck(), this.currentRNG);
     this.discarded = [];
     this.currentPlayer = 0;
     this.started = false;
@@ -157,67 +111,12 @@ class Uno {
     return this.players.length === this.maxPlayers && this.started === false;
   }
 
-  // shuffles an array of cards using the Dusternfeld shuffle algorithm
-  // https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle#The_modern_algorithm
-  shuffleCards(array) {
-    for (let i = array.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [array[i], array[j]] = [array[j], array[i]];
-    }
-    return array;
-  }
-
-  shuffleCardsSeeded(array, seed) {
-    const rng = seedrandom(seed);
-    let m = array.length;
-
-    // While there remain elements to shuffle…
-    while (m) {
-
-      // Pick a remaining element…
-      const i = Math.floor(rng() * m--);
-
-      // And swap it with the current element.
-      const t = array[m];
-      array[m] = array[i];
-      array[i] = t;
-      ++seed;
-    }
-
-    return array;
-  }
-
-  // returns an array of cards taken from this.deck
-  dealCards(cardsNumber) {
-    if (cardsNumber > this.deck.length) {
-      // keep the last card from the discard pile
-      const lastCard = this.discarded.pop();
-      // clean the discard pile from colored wild cards
-      for (const card of this.discarded) {
-        if (card.type === 'Wild' || card.type === 'WildDraw') {
-          card.color = 'Blank';
-          card.name = 'Blank_' + card.type;
-        }
-      }
-      // shuffle the deck and the discard pile
-      this.deck = this.shuffleCardsSeeded(
-        [...this.deck, ...this.discarded],
-        this.seed,
-      );
-      // add the last card of the discard pile back to the discard pile
-      this.discarded = [lastCard];
-    }
-    const cardsToDeal = this.deck.slice(0, cardsNumber);
-    this.deck.splice(0, cardsNumber);
-    return cardsToDeal;
-  }
-
   // initialized the game
   start() {
     this.startTime = Date.now();
     // deal the cards to the players
     this.players.forEach(player => {
-      player.hand = this.dealCards(7);
+      player.hand = Deck.dealCards(this.deck, this.discarded, 7, this.seed);
     });
     // If the first card is a wild card:
     // Return card to the deck, shuffle, flip top card to start discard pile
@@ -226,7 +125,7 @@ class Uno {
       console.log('first card is WildDraw, reshuffling');
       this.deck.unshift(firstDiscard);
       this.currentRNG = this.rng();
-      this.deck = this.shuffleCards([...this.deck], this.currentRNG);
+      this.deck = Deck.shuffleCardsSeeded([...this.deck], this.currentRNG);
       firstDiscard = this.deck.shift();
     }
     // If the first has any special effect, they will be applied
@@ -352,7 +251,7 @@ class Uno {
   draw() {
     const player = this.players[this.currentPlayer];
     // get a card from the deck
-    const newCards = this.dealCards(1);
+    const newCards = Deck.dealCards(this.deck, this.discarded, 1, this.seed);
     // add the card to the player's hand
     player.hand.push(...newCards);
     // callback to update frontend and draw the new card
@@ -366,8 +265,11 @@ class Uno {
   // same as draw but used only for special cards effects or contesting
   // takes a number of cards to draw and a player's index
   forcedDraw(number, playerNumber = this.currentPlayer) {
+    console.log(this.discarded.length);
+    console.log(this.deck.length);
     const player = this.players[playerNumber];
-    const newCards = this.dealCards(number);
+    const newCards =
+      Deck.dealCards(this.deck, this.discarded, number, this.seed);
     player.hand.push(...newCards);
     this.drawCallback(player.socketId, newCards);
     // log action: forcedDraw

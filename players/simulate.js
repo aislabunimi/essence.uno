@@ -1,5 +1,7 @@
 const seedrandom = require('seedrandom');
 
+const Deck = require('../utils/Deck');
+
 const Random = require('./random');
 const RandomPlay = require('./randomPlay');
 const Greedy = require('./greedy');
@@ -12,7 +14,11 @@ const Evaluate = require('./evaluate');
 const GameState = require('./gameState');
 
 function simGame(nextMoveP1, nextMoveP2, seed) {
-  let gamestate = new GameState(seed, shuffleCardsSeeded(newDeck(), seed), 0);
+  let gamestate = new GameState(
+    seed,
+    Deck.shuffleCardsSeeded(Deck.createDeck(), seed),
+    0,
+  );
   let last = null;
   let turn = 0;
   let repeat = 0;
@@ -64,7 +70,7 @@ function runSimulation(P1, P2, seed, numGames, printResults) {
       console.log(`Game ${i} result: ${result.eval}, turns: ${result.length}, repeat: ${result.repeat}`);
     }
   }
-  // console.log('wins/numGames: ' + wins / numGames + ', avg game length: ' + totalTurns / numGames + ' turns' + ', repeats: ' + repeats);
+  console.log('wins/numGames: ' + wins / numGames + ', avg game length: ' + totalTurns / numGames + ' turns' + ', repeats: ' + repeats);
   // console.timeEnd('simulation');
   return ({
     winsPerc: wins / numGames,
@@ -81,13 +87,14 @@ const simSeed = 'seed2';
 
 const modules = [
   GreedyMiniMax2.setDepthAndEvaluator(0, Evaluate.eval1),
-  GreedyMiniMax2.setDepthAndEvaluator(2, alpha075),
-  GreedyMiniMax2.setDepthAndEvaluator(2, alpha05),
+  GreedyMiniMax2.setDepthAndEvaluator(3, alpha1),
+  GreedyMiniMax2.setDepthAndEvaluator(3, alpha075),
+  GreedyMiniMax2.setDepthAndEvaluator(3, alpha05),
 ];
 const modules_names = [
-  'Greedy', 'GMMA075', 'GMMA05asdasd', 'GMM1_2',
+  'Greedy', 'D3A1', 'D3A075', 'D3A05',
 ];
-const cm = confusionMatrix(modules, modules_names, simSeed, 10);
+const cm = confusionMatrix(modules, modules_names, simSeed, 100);
 printConfusionMatrix(cm, modules_names);
 
 // create confusion matrix with each algorithm against each other
@@ -102,6 +109,7 @@ function confusionMatrix(algorithms, algorithmsNames, seed, runs = 100) {
       start = elapsed_time(start, `${algorithmsNames[i]} - ${algorithmsNames[j]}(${((i * algorithms.length) + (j + 1)) * runs}/${algorithms.length * algorithms.length * runs})`);
     }
     results.push(row);
+    break;
   }
   return results;
 }
@@ -114,7 +122,7 @@ function printConfusionMatrix(matrix, names) {
       maxNameLength = names[i].length;
     }
   }
-  // find longest number 
+  // find longest number
   let maxNumberLength = 0;
   for (let i = 0; i < matrix.length; i++) {
     for (let j = 0; j < matrix[i].length; j++) {
@@ -180,7 +188,6 @@ function printConfusionMatrix(matrix, names) {
   } */
 }
 
-
 function elapsed_time(start, note) {
   const elapsed = process.hrtime(start);
   const minutes = Math.floor(elapsed[0] / 60);
@@ -188,53 +195,4 @@ function elapsed_time(start, note) {
   const milliseconds = elapsed[1] / 1000000;
   console.log(`${note} - ${minutes}:${seconds}.${Math.floor(milliseconds)}`);
   return start;
-}
-
-function newDeck() {
-  const colors = ['Red', 'Yellow', 'Green', 'Blue'];
-  const color_types = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'Draw', 'Reverse', 'Skip'];
-  const special_types = ['Wild', 'WildDraw'];
-  const cards = [];
-  for (const color of colors) {
-    for (const type of color_types) {
-    // In uno deck you have 2 copies of every number expect for 0
-      const newCard = {
-        name: `${color}_${type}`,
-        color: color,
-        type: type,
-      };
-      if (type !== '0') {
-        cards.push(newCard);
-      }
-      cards.push(newCard);
-    }
-  }
-  // add 4 of each special cards
-  for (const type of special_types) {
-    const newCard = {
-      name: `Blank_${type}`,
-      color: 'Blank',
-      type: type,
-    };
-    for (let i = 0; i < 4; i++) {
-      cards.push(newCard);
-    }
-  }
-  return cards;
-}
-
-function shuffleCardsSeeded(array, seed) {
-  const rng = seedrandom(seed);
-  let m = array.length;
-  // While there remain elements to shuffle…
-  while (m) {
-    // Pick a remaining element…
-    const i = Math.floor(rng() * m--);
-    // And swap it with the current element.
-    const t = array[m];
-    array[m] = array[i];
-    array[i] = t;
-    ++seed;
-  }
-  return array;
 }

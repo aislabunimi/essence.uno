@@ -1,4 +1,5 @@
 const seedrandom = require('seedrandom');
+const Deck = require('../utils/Deck');
 
 class GameState {
   constructor(seed, deck, turn, hands, discarded, action) {
@@ -11,7 +12,10 @@ class GameState {
 
     // deal cards for the 2 players
     if (!hands) {
-      this.hands = [this.dealCards(7), this.dealCards(7)];
+      this.hands = [
+        Deck.dealCards(this.deck, this.discarded, 7, this.seed),
+        Deck.dealCards(this.deck, this.discarded, 7, this.seed),
+      ];
     }
     else {
       this.hands = [];
@@ -24,7 +28,7 @@ class GameState {
       while (firstDiscard.type === 'WildDraw') {
         this.deck.unshift(firstDiscard);
         this.currentRNG = this.rng();
-        this.deck = this.shuffleCardsSeeded([...this.deck], this.currentRNG);
+        this.deck = Deck.shuffleCardsSeeded([...this.deck], this.currentRNG);
         firstDiscard = this.deck.shift();
       }
       this.discarded = [firstDiscard];
@@ -43,7 +47,7 @@ class GameState {
     if (this.action) {
       switch (this.action.type) {
       case 'Draw_Pass': {
-        const draw = this.dealCards(1);
+        const draw = Deck.dealCards(this.deck, this.discarded, 1, this.seed);
         // add card to current player hand
         this.hands[this.turn].push(...draw);
         // progress turn
@@ -51,7 +55,7 @@ class GameState {
         break;
       }
       case 'Draw_Play': {
-        this.dealCards(1);
+        Deck.dealCards(this.deck, this.discarded, 1, this.seed);
         // discard card
         this.discarded.push(this.action.card);
         // apply special card effects
@@ -81,7 +85,8 @@ class GameState {
     if (this.isFinal()) return [];
     const hand = this.hands[this.turn];
     const discard = this.discarded[this.discarded.length - 1];
-    const drawable = this.dealCards(1);
+    const drawable =
+      Deck.dealCards([...this.deck], [...this.discarded], 1, this.seed);
     const actions = [{ type: 'Draw_Pass' }];
 
     if (this.cardIsPlayable(drawable[0], discard)) {
@@ -108,7 +113,6 @@ class GameState {
     }
     // plays.push(...hand.filter(card => this.cardIsPlayable(card, discard)));
     // actions.push(...plays.map(card => ({ type: 'Play', card })));
-    this.deck.unshift(...drawable);
     // console.log(actions);
     return actions;
   }
@@ -151,7 +155,7 @@ class GameState {
     switch (card.type) {
     case 'WildDraw': {
       // make the other player draw 4 cards
-      const draw = this.dealCards(4);
+      const draw = Deck.dealCards(this.deck, this.discarded, 4, this.seed);
       this.hands[this.nextTurn()].push(...draw);
       // skip turn
       this.turn = this.nextTurn();
@@ -159,7 +163,7 @@ class GameState {
     }
     case 'Draw': {
       // make the other player draw 2 cards
-      const draw = this.dealCards(2);
+      const draw = Deck.dealCards(this.deck, this.discarded, 2, this.seed);
       this.hands[this.nextTurn()].push(...draw);
       // skip turn
       this.turn = this.nextTurn();
@@ -225,40 +229,6 @@ class GameState {
     else {
       return card;
     }
-  }
-
-  shuffleCardsSeeded(array, seed) {
-    const rng = seedrandom(seed);
-    let m = array.length;
-    // While there remain elements to shuffle…
-    while (m) {
-      // Pick a remaining element…
-      const i = Math.floor(rng() * m--);
-      // And swap it with the current element.
-      const t = array[m];
-      array[m] = array[i];
-      array[i] = t;
-      ++seed;
-    }
-    return array;
-  }
-
-  dealCards(cardsNumber) {
-    if (cardsNumber > this.deck.length) {
-      // keep the last card from the discard pile
-      const lastCard = this.discarded.pop();
-      // shuffle the deck and the discard pile
-      const clearedDiscard = this.discarded.map(c => this.decolorWildCard(c));
-      this.deck = this.shuffleCardsSeeded(
-        [...this.deck, ...clearedDiscard],
-        this.seed,
-      );
-      // add the last card of the discard pile back to the discard pile
-      this.discarded = [lastCard];
-    }
-    const cardsToDeal = this.deck.slice(0, cardsNumber);
-    this.deck.splice(0, cardsNumber);
-    return cardsToDeal;
   }
 
   nextTurn(turn = this.turn) {
