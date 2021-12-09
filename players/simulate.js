@@ -23,6 +23,7 @@ const modulesNormal = [
   new RandomPlay(simSeed),
   new Greedy(simSeed),
   new Greedy2(simSeed),
+  new GreedyMiniMax2(simSeed, 2, alpha05, false),
 ];
 const cm1 = confusionMatrix(modulesNormal, simSeed, 1000);
 printConfusionMatrix(cm1, modulesNormal.map(m => m.name), 3);
@@ -39,8 +40,9 @@ const modulesAlpha = [
   new GreedyMiniMax2(simSeed, 2, alpha05),
   new GreedyMiniMax2(simSeed, 2, alpha075),
 ];
+const names = ['Alpha1', 'Alpha05', 'Alpha075'];
 const cm3 = confusionMatrix(modulesAlpha, simSeed, 100);
-printConfusionMatrix(cm3, modulesAlpha.map(m => m.name), 3);
+printConfusionMatrix(cm3, names, 3);
 
 // create confusion matrix with each algorithm against each other
 function confusionMatrix(algorithms, seed, runs = 100) {
@@ -62,7 +64,7 @@ function confusionMatrix(algorithms, seed, runs = 100) {
 }
 
 // print confusion matrix
-function printConfusionMatrix(matrix3, names, precision = 3) {
+function printConfusionMatrix(matrix3, n, precision = 3) {
   const winsPercMatrix = matrix3.map(row => row.map(cell => cell.winsPerc));
   const turnsAvgMatrix = matrix3.map(row => row.map(cell => cell.turnsAvg));
   const repeatsMatrix = matrix3.map(row => row.map(cell => cell.repeats));
@@ -73,14 +75,14 @@ function printConfusionMatrix(matrix3, names, precision = 3) {
     { matrix:repeatsMatrix, name: 'repeats ' },
   ];
   const max_length = Math.max(
-    ...matrixesWithNames.map(m => findLongestName(m.matrix, names, precision)),
+    ...matrixesWithNames.map(m => findLongestName(m.matrix, n, precision)),
   );
 
   for (matrixWithName of matrixesWithNames) {
     const matrix = matrixWithName.matrix;
     console.log(`${matrixWithName.name} matrix:`);
     // print header
-    const header = names.map(name => name.padEnd(max_length + 1));
+    const header = n.map(name => name.padEnd(max_length + 1));
     const headerString = ''.padEnd(max_length + 1) + header.join(' ');
     console.log(headerString);
     // print rows
@@ -92,13 +94,14 @@ function printConfusionMatrix(matrix3, names, precision = 3) {
           return string.padEnd(max_length + 1);
         },
       );
-      console.log(names[j].padEnd(max_length + 1) + rowString.join(' '));
+      console.log(n[j].padEnd(max_length + 1) + rowString.join(' '));
     }
+    console.log('\n');
   }
 }
 
-function findLongestName(matrix, names, precision) {
-  let longest = names.reduce(
+function findLongestName(matrix, n, precision) {
+  let longest = n.reduce(
     (l, name) => name.length > l ? name.length : l, 0,
   );
   for (row of matrix) {

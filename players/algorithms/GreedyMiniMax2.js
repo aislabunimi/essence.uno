@@ -1,12 +1,13 @@
 const seedrandom = require('seedrandom');
 
 class GreedyMiniMax2 {
-  constructor(seed, depth = 5, evalFun = this.evaluate) {
+  constructor(seed, depth = 5, evalFun = this.evaluate, random = true) {
     this.name = 'GreedyMiniMax2';
     this.evalFun = evalFun;
     this.depth = depth;
     this.seed = seed;
     this.rng = seedrandom(this.seed);
+    this.random = random;
   }
 
   chooseAction(gameState) {
@@ -85,10 +86,15 @@ class GreedyMiniMax2 {
         bests.splice(0, bests.length, action);
       }
     }
-    const randomIndex = Math.floor(this.rng() * bests.length);
     // to make it the same as the original implementation, without the randomness
     // return bests[bests.length - 1];
-    return bests[randomIndex];
+    if (!this.random) {
+      return bests[bests.length - 1];
+    }
+    else {
+      const randomIndex = Math.floor(this.rng() * bests.length);
+      return bests[randomIndex];
+    }
   }
 
   chooseMaxRandomly(rewardMovesList) {
@@ -101,10 +107,15 @@ class GreedyMiniMax2 {
         bests.splice(0, bests.length, action);
       }
     }
-    const randomIndex = Math.floor(this.rng() * bests.length);
     // to make it the same as the original implementation, without the randomness
     // return bests[bests.length - 1];
-    return bests[randomIndex];
+    if (!this.random) {
+      return bests[bests.length - 1];
+    }
+    else {
+      const randomIndex = Math.floor(this.rng() * bests.length);
+      return bests[randomIndex];
+    }
   }
 }
 
