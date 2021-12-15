@@ -258,6 +258,7 @@ function setup(game, player) {
     game.currentPlayer,
     player.hand,
     game.discarded[game.discarded.length - 1],
+    player.hasDrawn,
   );
 }
 

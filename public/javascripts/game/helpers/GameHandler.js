@@ -29,13 +29,19 @@ export default class GameHandler {
       }
     };
 
-    this.setup = (myTurn, currentTurn, cards, discard) => {
+    this.setup = (myTurn, currentTurn, cards, discard, hasDrawn) => {
       this.myTurn = myTurn;
       this.currentTurn = currentTurn;
       for (const card of cards) {
         scene.UIHandler.addCardPlayerHand(card);
       }
       scene.UIHandler.addCardDropZone(discard);
+      if (hasDrawn) {
+        scene.UIHandler.showButton(scene.strings.pass, () => {
+          scene.SocketHandler.pass();
+          scene.UIHandler.hideButton();
+        });
+      }
       scene.UIHandler.ready();
     };
 

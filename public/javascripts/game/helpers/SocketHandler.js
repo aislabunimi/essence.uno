@@ -13,8 +13,8 @@ export default class SocketHandler {
       window.history.back();
     });
 
-    this.socket.on('setup', (myTurn, currentTurn, cards, discard) => {
-      scene.GameHandler.setup(myTurn, currentTurn, cards, discard);
+    this.socket.on('setup', (myTurn, currentTurn, cards, discard, hasDrawn) => {
+      scene.GameHandler.setup(myTurn, currentTurn, cards, discard, hasDrawn);
     });
     this.socket.on('discard', (card) => {
       scene.GameHandler.discardServer(card);

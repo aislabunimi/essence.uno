@@ -265,8 +265,8 @@ class Uno {
   // same as draw but used only for special cards effects or contesting
   // takes a number of cards to draw and a player's index
   forcedDraw(number, playerNumber = this.currentPlayer) {
-    console.log(this.discarded.length);
-    console.log(this.deck.length);
+    // console.log(this.discarded.length);
+    // console.log(this.deck.length);
     const player = this.players[playerNumber];
     const newCards =
       Deck.dealCards(this.deck, this.discarded, number, this.seed);
