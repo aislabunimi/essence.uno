@@ -315,6 +315,13 @@ class UnoSP {
 
   // sets the next player's turn
   nextTurn() {
+    /* console.log('Bot hand serverside: ' + this.players[0].hand.map(c => c.name).join(', '));
+    if (this.deck.length > 0) {
+      console.log('deck serverside(' + this.deck.length + '): ' + this.deck[0].name);
+    }
+    else {
+      console.log('deck serverside(' + this.deck.length + '): empty');
+    } */
     this.currentPlayer = this.getNextTurn();
     // reset the player's hasDrawn flag
     this.players[this.currentPlayer].hasDrawn = false;

@@ -30,6 +30,7 @@ function createDeck() {
       cards.push(newCard);
     }
   }
+  // return shuffleCardsSeeded(cards, 1).slice(0, 20);
   return cards;
 }
 

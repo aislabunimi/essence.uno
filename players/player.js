@@ -122,11 +122,20 @@ class Player {
           console.log('Bot chose move: ' + move.type);
         }
 
+        this.gameState = this.gameState.nextState(move);
+
+        /* console.log('Bot hand clientside: ' + this.gameState.hands[0].map(c => c.name).join(', '));
+        if (this.gameState.deck.length > 0) {
+          console.log('deck clientside(' + this.gameState.deck.length + '): ' + this.gameState.deck[0].name);
+        }
+        else {
+          console.log('deck clientside(' + this.gameState.deck.length + '): empty');
+        } */
+
         setTimeout(() => {
           this.playMove(move);
         }, 1000);
 
-        this.gameState = this.gameState.nextState(move);
         // console.log(this.gameState.deck.length);
 
         /* if (move.type === 'Draw_Play' || move.type === 'Draw_Pass') {
