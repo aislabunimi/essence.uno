@@ -87,19 +87,8 @@ class GameState {
     const discard = this.discarded[this.discarded.length - 1];
     const drawable =
       Deck.dealCards([...this.deck], [...this.discarded], 1, this.seed);
-    const actions = [{ type: 'Draw_Pass' }];
-
-    if (this.cardIsPlayable(drawable[0], discard)) {
-      if (drawable[0].type === 'WildDraw' || drawable[0].type === 'Wild') {
-        const colored = this.colorWildCard(drawable[0]);
-        for (const card of colored) {
-          actions.push({ type: 'Draw_Play', card: card });
-        }
-      }
-      else {
-        actions.push({ type: 'Draw_Play', card: drawable[0] });
-      }
-    }
+    const actions = [];
+    // Play
     for (const card of hand) {
       if (card.type === 'WildDraw' || card.type === 'Wild') {
         const colored = this.colorWildCard(card);
@@ -111,6 +100,22 @@ class GameState {
         actions.push({ type: 'Play', card: card });
       }
     }
+    // Draw_Play
+    if (this.cardIsPlayable(drawable[0], discard)) {
+      if (drawable[0].type === 'WildDraw' || drawable[0].type === 'Wild') {
+        const colored = this.colorWildCard(drawable[0]);
+        for (const card of colored) {
+          actions.push({ type: 'Draw_Play', card: card });
+        }
+      }
+      else {
+        actions.push({ type: 'Draw_Play', card: drawable[0] });
+      }
+    }
+    
+    // Draw_Pass
+    actions.push({ type: 'Draw_Pass' });
+
     // plays.push(...hand.filter(card => this.cardIsPlayable(card, discard)));
     // actions.push(...plays.map(card => ({ type: 'Play', card })));
     // console.log(actions);
