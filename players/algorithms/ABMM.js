@@ -15,8 +15,43 @@ class ABMM {
     const myTurn = gameState.turn;
     const rewardMovesList = [];
 
-    let best = null;
+    this.counter = 0;
+    const alpha = Number.MIN_SAFE_INTEGER;
+    let beta = Number.MAX_SAFE_INTEGER;
+
+    let best = {
+      moves:null,
+      reward: Number.MAX_SAFE_INTEGER,
+    };
     for (const m of availableMoves) {
+      this.counter += 1;
+      const result = this.chooseActionReward(
+        gameState,
+        m,
+        myTurn,
+        0,
+        [m],
+        alpha,
+        beta,
+      );
+      if (result.reward < best.reward) {
+        best = result;
+        rewardMovesList.length = 0;
+      }
+      if (best.reward == result.reward) {
+        rewardMovesList.push(result);
+      }
+      beta = Math.min(beta, best.reward);
+      if (best.reward < alpha) {
+        // console.log('pruned');
+        break;
+      }
+    }
+
+
+    /* let best = null;
+    for (const m of availableMoves) {
+      this.counter += 1;
       const result =
         this.chooseActionReward(
           gameState,
@@ -41,7 +76,7 @@ class ABMM {
       if (best.reward == result.reward) {
         rewardMovesList.push(result);
       }
-    }
+    } */
     /* for (const m of rewardMovesList) {
       console.log(`${JSON.stringify(m.moves)} -> ${m.reward}\n`);
     } */
@@ -50,10 +85,11 @@ class ABMM {
     );
     return minReward.moves[0]; */
     const chosen = this.chooseRandomly(rewardMovesList);
+    // console.log(`${this.counter}`);
     // console.log(gameState.hands[myTurn]);
     // console.log(rewardMovesList);
     // console.log(chosen);
-    return chosen.moves[0];
+    return [chosen.moves[0], this.counter];
   }
 
   chooseActionReward(
@@ -77,6 +113,7 @@ class ABMM {
         reward: Number.MIN_SAFE_INTEGER,
       };
       for (const m of availableMoves) {
+        this.counter += 1;
         const result = this.chooseActionReward(
           nextState,
           m,
@@ -90,12 +127,12 @@ class ABMM {
           best = result;
           rewardMovesList.length = 0;
         }
-        alpha = Math.max(alpha, best.reward);
         if (best.reward == result.reward) {
           rewardMovesList.push(result);
         }
-        // console.log(`${alpha} - ${beta}`);
-        if (alpha >= beta) {
+        alpha = Math.max(alpha, best.reward);
+        // console.log(`${alpha} - ${best} - ${beta}`);
+        if (best.reward > beta) {
           // console.log('pruned');
           break;
         }
@@ -108,12 +145,15 @@ class ABMM {
         reward: Number.MAX_SAFE_INTEGER,
       };
       for (const m of availableMoves) {
+        this.counter += 1;
         const result = this.chooseActionReward(
           nextState,
           m,
           myTurn,
           depth + 1,
           [...moves, m],
+          alpha,
+          beta,
         );
         if (result.reward < best.reward) {
           best = result;
@@ -123,7 +163,7 @@ class ABMM {
           rewardMovesList.push(result);
         }
         beta = Math.min(beta, best.reward);
-        if (alpha >= beta) {
+        if (best.reward < alpha) {
           // console.log('pruned');
           break;
         }
@@ -189,48 +229,6 @@ class ABMM {
     else {
       const randomIndex = Math.floor(this.rng() * rewardMovesList.length);
       return rewardMovesList[randomIndex];
-    }
-  }
-
-  chooseMinRandomly(rewardMovesList) {
-    const bests = [rewardMovesList[0]];
-    for (const action of rewardMovesList) {
-      if (action.reward === bests[0].reward) {
-        bests.push(action);
-      }
-      else if (action.reward < bests[0].reward) {
-        bests.splice(0, bests.length, action);
-      }
-    }
-    // to make it the same as the original implementation, without the randomness
-    // return bests[bests.length - 1];
-    if (!this.random) {
-      return bests[bests.length - 1];
-    }
-    else {
-      const randomIndex = Math.floor(this.rng() * bests.length);
-      return bests[randomIndex];
-    }
-  }
-
-  chooseMaxRandomly(rewardMovesList) {
-    const bests = [rewardMovesList[0]];
-    for (const action of rewardMovesList) {
-      if (action.reward === bests[0].reward) {
-        bests.push(action);
-      }
-      else if (action.reward > bests[0].reward) {
-        bests.splice(0, bests.length, action);
-      }
-    }
-    // to make it the same as the original implementation, without the randomness
-    // return bests[bests.length - 1];
-    if (!this.random) {
-      return bests[bests.length - 1];
-    }
-    else {
-      const randomIndex = Math.floor(this.rng() * bests.length);
-      return bests[randomIndex];
     }
   }
 }
