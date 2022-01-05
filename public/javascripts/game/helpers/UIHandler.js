@@ -20,7 +20,7 @@ const redCardColor = 0xea323c;
 // const blueCardColor = 0x0098dc;
 // const yellowCardColor = 0xffc825;
 const greenCardColor = 0x33984b;
-const greyColor = 0x999999;
+const greyColor = 0x404040;
 
 export default class UIHandler {
   constructor(scene) {
