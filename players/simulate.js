@@ -8,6 +8,8 @@ const Greedy = require('./algorithms/Greedy');
 const Greedy2 = require('./algorithms/Greedy2');
 const GreedyMiniMax = require('./algorithms/GreedyMiniMax');
 const GreedyMiniMax2 = require('./algorithms/GreedyMiniMax2');
+const MM = require('./algorithms/MM');
+const ABMM = require('./algorithms/ABMM');
 
 const GameState = require('./gamestate/gameState');
 const Evaluate = require('./gamestate/evaluate');
@@ -16,26 +18,62 @@ const alpha05 = Evaluate.setAlpha(0.5);
 const alpha075 = Evaluate.setAlpha(0.75);
 const alpha1 = Evaluate.setAlpha(1);
 
-const simSeed = 'seed2';
+const simSeed = 'seed5';
 
-const modulesNormal = [
+/* const modulesNormal = [
   new Random(simSeed),
   new RandomPlay(simSeed),
-  new Greedy(simSeed),
   new Greedy2(simSeed),
-  new GreedyMiniMax2(simSeed, 2, alpha05, false),
+  new GreedyMiniMax2(simSeed, 2, alpha05, true),
 ];
-const cm1 = confusionMatrix(modulesNormal, simSeed, 1000);
-printConfusionMatrix(cm1, modulesNormal.map(m => m.name), 3);
+const cm1 = confusionMatrix(modulesNormal, simSeed, 100);
+printConfusionMatrix(cm1, modulesNormal.map(m => m.name), 3); */
 
-const modules = [
+/* const modulesNormal2 = [
+  new Random(simSeed),
+  new GreedyMiniMax2(simSeed, 2, alpha075, true),
+  new GreedyMiniMax2(simSeed, 2, Evaluate.evalAdaptive, true),
+];
+const cm2 = confusionMatrix(modulesNormal2, simSeed, 100);
+printConfusionMatrix(cm2, modulesNormal2.map(m => m.name), 3); */
+/* const GMM2 = new GreedyMiniMax2(simSeed, 3, alpha075, false);
+const R = new Random(simSeed);
+const RPlay = new RandomPlay(simSeed);
+const MiniMax = new MM(simSeed, 3, alpha075, false);
+const AlphaBeta = new ABMM(simSeed, 3, alpha075, false);
+
+const start1 = process.hrtime();
+const res1 = runSimulation(GMM2, MiniMax, simSeed, 100);
+elapsed_time(start1, `${res1.winsPerc} - ${res1.turnsAvg} - ${res1.counterP1} - ${res1.counterP2}`);
+
+const start2 = process.hrtime();
+const res2 = runSimulation(AlphaBeta, AlphaBeta, simSeed, 100);
+elapsed_time(start2, `${res2.winsPerc} - ${res2.turnsAvg} - ${res2.counterP1} - ${res2.counterP2}`);
+
+const start = process.hrtime();
+const res = runSimulation(MiniMax, AlphaBeta, simSeed, 100);
+elapsed_time(start, `${res.winsPerc} - ${res.turnsAvg} - ${res.counterP1} - ${res.counterP2}`); */
+
+const ks = [0.0, 0.05, 0.1, 0.15, 0.2, 0.25,
+  0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65,
+];
+const depth = 3;
+for (const k of ks) {
+  const P1 = new ABMM(simSeed, depth, alpha075);
+  const P2 = new ABMM(simSeed, depth, Evaluate.setK(k));
+  const start = process.hrtime();
+  const res = runSimulation(P1, P2, simSeed, 100);
+  elapsed_time(start, `${k.toFixed(2)} -> win%:${res.winsPerc.toFixed(2)} turnAvg:${res.turnsAvg.toFixed(2)}`);
+}
+
+/* const modules = [
   new GreedyMiniMax(simSeed, 2),
   new GreedyMiniMax2(simSeed, 2),
 ];
 const cm2 = confusionMatrix(modules, simSeed, 100);
-printConfusionMatrix(cm2, modules.map(m => m.name), 3);
+printConfusionMatrix(cm2, modules.map(m => m.name), 3); */
 
-const modulesAlpha = [
+/* const modulesAlpha = [
   new GreedyMiniMax2(simSeed, 2, alpha1),
   new GreedyMiniMax2(simSeed, 2, alpha05),
   new GreedyMiniMax2(simSeed, 2, alpha075),
@@ -43,6 +81,16 @@ const modulesAlpha = [
 const names = ['Alpha1', 'Alpha05', 'Alpha075'];
 const cm3 = confusionMatrix(modulesAlpha, simSeed, 100);
 printConfusionMatrix(cm3, names, 3);
+
+const modulesAlphaNoRandom = [
+  new GreedyMiniMax2(simSeed, 2, alpha1, false),
+  new GreedyMiniMax2(simSeed, 2, alpha05, false),
+  new GreedyMiniMax2(simSeed, 2, alpha075, false),
+];
+const names4 = ['Alpha1NR', 'Alpha05NR', 'Alpha075NR'];
+const cm4 = confusionMatrix(modulesAlphaNoRandom, simSeed, 100);
+printConfusionMatrix(cm4, names4, 3); */
+
 
 // create confusion matrix with each algorithm against each other
 function confusionMatrix(algorithms, seed, runs = 100) {
@@ -124,37 +172,60 @@ function simGame(P1, P2, seed) {
   let last = null;
   let turn = 0;
   let repeat = 0;
+  let c1 = 0;
+  let c2 = 0;
   while (!gamestate.isFinal()) {
     last = gamestate.eval();
     let action = null;
+    let c = null;
     if (gamestate.turn == 0) {
-      action = P1.chooseAction(gamestate);
+      const result = P1.chooseAction(gamestate);
+      if (Array.isArray(result)) {
+        [action, c] = result;
+        c1 += c;
+      }
+      else {
+        action = result;
+      }
     }
     else {
-      action = P2.chooseAction(gamestate);
+      const result = P2.chooseAction(gamestate);
+      if (Array.isArray(result)) {
+        [action, c] = result;
+        c2 += c;
+      }
+      else {
+        action = result;
+      }
     }
     // console.log(gamestate.hands[0].length + ' ' + gamestate.hands[1].length);
     gamestate = gamestate.nextState(action);
+    // console.log(gamestate.turn);
     turn++;
     if (gamestate.eval() === last) repeat++;
     if (repeat > 100) {
       // console.log('repeat');
       break;
     }
+    // console.log(turn);
   }
   return {
     gamestate:gamestate,
     eval: gamestate.eval(),
     length: turn,
+    counterP1: c1,
+    counterP2: c2,
     repeat: repeat === 100,
   };
 }
 
-function runSimulation(P1, P2, seed, numGames, printResults) {
+function runSimulation(P1, P2, seed, numGames, printResults = false) {
   const rng = seedrandom(seed);
   let wins = 0;
   let totalTurns = 0;
   let repeats = 0;
+  let counterP1 = 0;
+  let counterP2 = 0;
   // console.time('simulation');
   for (let i = 0; i < numGames; i++) {
     const result = simGame(P1, P2, rng());
@@ -165,6 +236,8 @@ function runSimulation(P1, P2, seed, numGames, printResults) {
       repeats++;
     }
     totalTurns += result.length;
+    counterP1 += result.counterP1;
+    counterP2 += result.counterP2;
     if (printResults) {
       console.log(`Game ${i} result: ${result.eval}, turns: ${result.length}, repeat: ${result.repeat}`);
     }
@@ -175,14 +248,19 @@ function runSimulation(P1, P2, seed, numGames, printResults) {
     winsPerc: wins / numGames,
     turnsAvg: totalTurns / numGames,
     repeats: repeats,
+    counterP1: counterP1,
+    counterP2: counterP2,
   });
 }
 
 function elapsed_time(start, note) {
   const elapsed = process.hrtime(start);
-  const minutes = Math.floor(elapsed[0] / 60);
-  const seconds = elapsed[0] % 60;
-  const milliseconds = elapsed[1] / 1000000;
+  const minutes =
+    Math.floor(elapsed[0] / 60).toLocaleString('en-US', { minimumIntegerDigits: 2 });
+  const seconds =
+    (elapsed[0] % 60).toLocaleString('en-US', { minimumIntegerDigits: 2 });
+  const milliseconds =
+    (elapsed[1] / 1000000).toLocaleString('en-US', { minimumIntegerDigits: 3 });
   console.log(`${note} - ${minutes}:${seconds}.${Math.floor(milliseconds)}`);
   return start;
 }

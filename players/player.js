@@ -3,6 +3,7 @@ const RandomPlay = require('./algorithms/RandomPlay');
 const Greedy = require('./algorithms/Greedy');
 const GreedyMiniMax = require('./algorithms/GreedyMiniMax');
 const GreedyMiniMax2 = require('./algorithms/GreedyMiniMax2');
+const ABMM = require('./algorithms/ABMM');
 
 const Evaluate = require('./gamestate/evaluate');
 
@@ -39,6 +40,13 @@ function create(roomUUID, difficulty, seed, deck) {
   case 'GreedyMiniMax2A075': {
     console.log('creating greedyMiniMax2A075 player');
     const algo = new GreedyMiniMax2(seed, 5, Evaluate.setAlpha(0.75));
+    return new Player(
+      roomUUID, difficulty, seed, deck, algo,
+    );
+  }
+  case 'ABMMK03' : {
+    console.log('creating ABMM player');
+    const algo = new ABMM(seed, 5, Evaluate.setK(0.3));
     return new Player(
       roomUUID, difficulty, seed, deck, algo,
     );
