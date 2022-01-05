@@ -14,7 +14,9 @@ class GreedyMiniMax2 {
     const availableMoves = gameState.getAvailableActions();
     const myTurn = gameState.turn;
     const rewardMovesList = [];
+    this.counter = 0;
     for (const m of availableMoves) {
+      this.counter += 1;
       const result =
         this.chooseActionReward(
           gameState,
@@ -32,7 +34,7 @@ class GreedyMiniMax2 {
       (acc, curr) => { return acc.reward < curr.reward ? acc : curr; },
     );
     return minReward.moves[0]; */
-    return this.chooseMinRandomly(rewardMovesList).moves[0];
+    return [this.chooseMinRandomly(rewardMovesList).moves[0], this.counter];
   }
 
   chooseActionReward(
@@ -49,6 +51,7 @@ class GreedyMiniMax2 {
     const availableMoves = nextState.getAvailableActions();
     const rewardMovesList = [];
     for (const m of availableMoves) {
+      this.counter += 1;
       const result = this.chooseActionReward(
         nextState,
         m,
