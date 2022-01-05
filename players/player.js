@@ -121,8 +121,15 @@ class Player {
           this.drew = false;
         }
 
-        const move =
+        let move = null;
+        const result =
           this.algorithm.chooseAction(this.gameState);
+        if (Array.isArray(result)) {
+          move = result[0];
+        }
+        else {
+          move = result;
+        }
         if (move.card) {
           console.log('Bot chose move: ' + move.type + ' - ' + move.card.name);
         }
