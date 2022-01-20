@@ -3,6 +3,8 @@ export default class GameHandler {
     this.myTurn = null;
     this.currentTurn = null;
     this.availableMoves = [];
+    this.turns = 0;
+    this.winner = null;
 
     this.isMyTurn = () => {
       return this.myTurn === this.currentTurn;
@@ -48,6 +50,7 @@ export default class GameHandler {
     this.discardServer = (card) => {
       // if someone else plays a card, clear the UNO button
       this.clearUno();
+      this.turns += 1;
       if (this.canPlay(card)) {
         // if it's my turn, make the card appear
         // on top of the discard pile
@@ -103,6 +106,7 @@ export default class GameHandler {
       if (this.myTurn === this.currentTurn && this.availableMoves.includes('Draw')) {
         scene.SocketHandler.drawCard();
         scene.UIHandler.showButton(scene.strings.pass, () => {
+          this.turns += 1;
           scene.SocketHandler.pass();
           scene.UIHandler.hideButton();
         });
@@ -161,6 +165,7 @@ export default class GameHandler {
 
     this.win = (winner) => {
       scene.UIHandler.buildAlertBox(`${winner} ${scene.strings.end}`);
+      this.winner = winner;
       setTimeout(() => {
         this.funFeedback();
       }, 5000);
@@ -221,8 +226,15 @@ export default class GameHandler {
     this.surveyGameDone = () => {
       scene.UIHandler.buildAlertBox(scene.strings.surveyGameDone);
       const gameNumber = window.localStorage.getItem('gameNumber');
-      console.log(gameNumber);
       window.localStorage.setItem('gameNumber', parseInt(gameNumber) + 1);
+      const games = window.localStorage.getItem('games');
+      const game = {
+        gameNumber: parseInt(gameNumber) + 1,
+        date: new Date(),
+        winner: this.winner,
+        turns: this.turns,
+      };
+      window.localStorage.setItem('games', JSON.stringify([...JSON.parse(games), game]));
       setTimeout(() => {
         window.history.go(-1);
       }

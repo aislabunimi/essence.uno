@@ -29,6 +29,10 @@
   box-shadow: none !important;
   margin: 0 auto !important;
 }
+.sv_page_title{
+  font-size: 20px !important;
+  font-weight: bold !important;
+}
 input[type=button]{
   color: var(--button-text) !important;
   width: 40% !important;
