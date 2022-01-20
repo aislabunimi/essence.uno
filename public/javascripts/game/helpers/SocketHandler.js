@@ -52,6 +52,9 @@ export default class SocketHandler {
     this.socket.on('room_full', () => {
       scene.GameHandler.full();
     });
+    this.socket.on('survey_game_done', () => {
+      scene.GameHandler.surveyGameDone();
+    });
     this.socket.on('disconnected', () => {
       scene.GameHandler.disconnect();
     });

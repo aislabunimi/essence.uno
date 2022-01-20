@@ -1,0 +1,32 @@
+<body>
+  <div class="half centered dark">
+    <h1>Uno</h1>
+    <h2>Survey</h2>
+    {{!-- <form method="post" id="form" action="/gameSurvey">
+      <p>
+        Survey
+      </p>
+      <button id="createRoomButton" type="submit">
+        Start playing
+      </button>
+      <input type="text" name="roomUUID" id="roomUUID" hidden />
+    </form> --}}
+    <div id="survey"></div>
+    <div id="survey-complete" hidden>
+      <h3>Thanks for completing the survey!</h3>
+    </div>
+    <form method="post" id="form" action="/game">
+      <input type="hidden" name="name">
+      <input type="hidden" name="surname">
+      <input type="hidden" name="roomName">
+      <input type="hidden" name="roomUUID">
+    </form>
+  </div>
+  <script src="/socket.io/socket.io.js"></script>
+  <link href="https://unpkg.com/survey-jquery@1.9.5/survey.css" type="text/css" rel="stylesheet" />
+  <script src="https://code.jquery.com/jquery-3.6.0.slim.min.js" integrity="sha256-u7e5khyithlIdTpu22PHhENmPcRdFiHRjhAuHcs05RI=" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/survey-jquery@1.9.5/survey.jquery.min.js"></script>
+  <script src="javascripts/survey.js"></script>
+</body>
+
+</html>

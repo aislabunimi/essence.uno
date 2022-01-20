@@ -75,6 +75,26 @@ io.on('connection', (socket) => {
     rooms.push(newRoom);
     socket.emit('room_created', newRoom.uuid);
   });
+  socket.on('create_room_survey', (roomName, difficulty) => {
+    console.log(roomName, ': created survey room with', difficulty, 'difficulty');
+    // create a new room and add it to rooms array
+    const roomUUID = uuidv4();
+    const newRoom = {
+      name: roomName,
+      uuid: roomUUID,
+      type: 'survey' + ' ' + difficulty,
+      startTime: Date.now(),
+      endTime: null,
+      gamesPlayed: 0,
+      players: 0,
+      maxPlayers: 2,
+      game: new UnoSP(
+        roomUUID, 2, drawCallback, winCallback, difficulty),
+      rounds: [],
+    };
+    rooms.push(newRoom);
+    socket.emit('room_created', newRoom.uuid);
+  });
 
   socket.on('join_room', (roomUUID, name, surname, uuid) => {
     console.log(`${roomUUID}: joined by ${name} ${surname} (${uuid})`);
@@ -325,8 +345,16 @@ function wild4ContestCallback(roomUUID, socketId) {
 function winCallback(roomUUID, player) {
   // tell the room the winner
   io.to(roomUUID).emit('win', player);
-  // after 5 seconds, reset the room
-  setTimeout(() => {
-    resetRoom(rooms.find((room) => room.uuid === roomUUID));
-  }, 25000);
+  // after 25 seconds, reset the room
+  const room = rooms.find((r) => r.uuid === roomUUID);
+  if (!room.type.includes('survey')) {
+    setTimeout(() => {
+      resetRoom(room);
+    }, 25000);
+  }
+  else {
+    setTimeout(() => {
+      io.to(roomUUID).emit('survey_game_done');
+    }, 2000);
+  }
 }

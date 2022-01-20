@@ -218,6 +218,17 @@ export default class GameHandler {
       , 3000);
     };
 
+    this.surveyGameDone = () => {
+      scene.UIHandler.buildAlertBox(scene.strings.surveyGameDone);
+      const gameNumber = window.localStorage.getItem('gameNumber');
+      console.log(gameNumber);
+      window.localStorage.setItem('gameNumber', parseInt(gameNumber) + 1);
+      setTimeout(() => {
+        window.history.go(-1);
+      }
+      , 2000);
+    };
+
     this.disconnect = () => {
       scene.UIHandler.buildAlertBox(scene.strings.disconnected, null, null);
       setTimeout(() => {

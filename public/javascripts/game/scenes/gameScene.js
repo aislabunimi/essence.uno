@@ -50,6 +50,7 @@ export default class GameScene extends Phaser.Scene {
       funFeedback: 'Was the game fun?',
       hardFeedback: 'Was the game hard?',
       restartSoon: 'The game will restart soon',
+      surveyGameDone: 'Thanks for playing!',
       end: 'won!',
     };
 

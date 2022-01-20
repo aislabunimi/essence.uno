@@ -1,0 +1,75 @@
+:root {
+  --background: #ffffff;
+  --background-alt: #d6d6d6;
+  --text: #000000;
+  --accent: #6495ed;
+  --button-text: #ffffff;
+}
+.sv_main{
+  font-family: "Montserrat", sans-serif !important;
+  font-size: 16px !important;
+}
+.sv_body{
+  background-color: var(--background) !important;
+  color: var(--text) !important;
+  border-color: var(--accent) !important;
+}
+.sv_body:hover{
+  border-color: var(--accent) !important;
+}
+.sv_q{
+  background-color: var(--background) !important;
+  color: var(--text) !important;
+}
+.sv_q_title{
+  color: var(--text) !important;
+}
+.sv_q_text_root{
+  width: 90% !important;
+  box-shadow: none !important;
+  margin: 0 auto !important;
+}
+input[type=button]{
+  color: var(--button-text) !important;
+  width: 40% !important;
+}
+/* .sv_complete_btn{
+  color: var(--button-text) !important;
+  width: 40% !important;
+}
+.sv_prev_btn{
+  color: var(--button-text) !important;
+  width: 40% !important;
+} */
+.sv-ranking{
+  background-color: var(--background) !important;
+  margin: 0 auto;
+}
+.sv-ranking-item__content{
+  background-color: var(--background) !important;
+  color: var(--text) !important;
+}
+.sv-ranking-item__index {
+  /* background-color: var(--background) !important; */
+  color: var(--text) !important;
+  background: var(--accent) none repeat scroll 0% 0% !important;
+}
+.sv-ranking-item__icon {
+  fill: var(--accent) !important;
+}
+.sv-ranking-item__ghost {
+  background: var(--background-alt) none repeat scroll 0% 0% !important;
+}
+div.sv-ranking:nth-child(8) {
+  font-family: "Montserrat", sans-serif !important;
+}
+ 
+
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #1c1c1e;
+    --background-alt: #454549;
+    --text: #faf0e6;
+  }
+}

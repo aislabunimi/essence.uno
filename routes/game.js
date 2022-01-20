@@ -12,7 +12,7 @@ router.post('/', function(req, res, next) {
 
   res.render('game', {
     layout: 'empty',
-    style: 'game.css',
+    styles: ['game.css'],
     title: 'Game',
     roomName: req.body.roomName,
     roomUUID: req.body.roomUUID,
