@@ -15,7 +15,7 @@ const config = {
 window.onload = () => {
   if (!document.cookie) {
     // console.log('no cookie');
-    window.history.go(-1);
+    window.location = document.referrer;
     return;
   }
   new Phaser.Game(config);

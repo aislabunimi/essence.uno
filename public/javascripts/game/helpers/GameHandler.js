@@ -229,7 +229,7 @@ export default class GameHandler {
     this.full = () => {
       scene.UIHandler.buildAlertBox(scene.strings.full);
       setTimeout(() => {
-        window.history.go(-1);
+        window.location = document.referrer;
       }
       , 3000);
     };
@@ -247,7 +247,7 @@ export default class GameHandler {
       };
       window.localStorage.setItem('games', JSON.stringify([...JSON.parse(games), game]));
       setTimeout(() => {
-        window.history.go(-1);
+        window.location = document.referrer;
       }
       , 2000);
     };
@@ -255,7 +255,7 @@ export default class GameHandler {
     this.disconnect = () => {
       scene.UIHandler.buildAlertBox(scene.strings.disconnected, null, null);
       setTimeout(() => {
-        window.history.go(-1);
+        window.location = document.referrer;
       }
       , 3000);
     };

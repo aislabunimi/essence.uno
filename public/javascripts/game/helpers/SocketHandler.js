@@ -10,7 +10,7 @@ export default class SocketHandler {
     this.socket.emit('join_room', scene.roomUUID, scene.user.name, scene.user.surname, scene.user.uuid);
     this.socket.on('room_not_found', () => {
       // go back to lobby
-      window.history.back();
+      window.location = document.referrer;
     });
 
     this.socket.on('setup', (myTurn, currentTurn, cards, discard, hasDrawn, isSurvey) => {

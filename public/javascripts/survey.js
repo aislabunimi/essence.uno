@@ -113,6 +113,7 @@ function clearSurvey() {
   window.localStorage.removeItem('done');
   window.localStorage.removeItem('gameNumber');
   window.localStorage.removeItem('games');
+  window.location.reload();
 }
 
 function pickDifficulty() {
