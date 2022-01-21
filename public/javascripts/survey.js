@@ -1,6 +1,8 @@
 // opening socket
 const socket = io();
 
+$('#clearSurveyButton').on('click', clearSurvey);
+
 // https://surveyjs.io/create-survey
 const surveys = [
   JSON.parse('{"pages":[{"name":"beforePlaying","elements":[{"type":"text","name":"name","title":"What\'s your name?","isRequired":true,"placeHolder":"It doesn\'t need to be the real one"},{"type":"text","name":"surname","title":"What\'s your surname?","isRequired":true,"placeHolder":"It doesn\'t need to be the real one"},{"type":"rating","name":"ownStrength","title":"How strong do you think you are at UNO?","isRequired":true,"rateMin": 0, "rateMax": 10}],"title":"Before playing"}],"completeText":"Play Game 1"}'),
@@ -69,9 +71,9 @@ function initializeSurvey() {
     }
     else {
       console.log('done');
+      window.localStorage.setItem('done', true);
       $('#survey').remove();
       $('#survey-complete').show();
-      window.localStorage.setItem('done', true);
     }
   }
   function savingPartialData(s) {
@@ -101,6 +103,16 @@ function pickSurvey() {
     }
   }
   return survey;
+}
+
+function clearSurvey() {
+  console.log('clearing survey');
+  // make cookie expire
+  document.cookie = 'uuid=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+  window.localStorage.removeItem('survey');
+  window.localStorage.removeItem('done');
+  window.localStorage.removeItem('gameNumber');
+  window.localStorage.removeItem('games');
 }
 
 function pickDifficulty() {
