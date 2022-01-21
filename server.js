@@ -231,6 +231,11 @@ io.on('connection', (socket) => {
     room.game.giveFeedback(k, v);
   });
 
+  socket.on('survey_results', (results) => {
+    // TODO: save the survey results on db once the survey structure is done
+    console.log(results);
+  });
+
   socket.on('disconnect', () => {
     // console.log('user disconnected:', socket.id);
     // find room the user was in

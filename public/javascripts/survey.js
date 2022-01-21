@@ -59,6 +59,7 @@ function initializeSurvey() {
     data.id = getCookie('uuid').slice(2);
     data.pageNo = s.currentPageNo;
     data.difficulties = difficulties;
+    socket.emit('survey_results', data);
     console.log('The final results are:' + JSON.stringify(data));
     // TODO: save data somewhere
     // go to game if not done
