@@ -28,6 +28,9 @@ export default class SocketHandler {
     this.socket.on('draw', cards => {
       scene.GameHandler.draw(cards);
     });
+    this.socket.on('show_draw', (cardsNumber, drawer) => {
+      scene.GameHandler.showDraw(cardsNumber, drawer);
+    });
     this.socket.on('current_turn', (currentTurn) => {
       scene.GameHandler.updateTurn(currentTurn);
     });

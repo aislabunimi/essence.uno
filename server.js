@@ -48,7 +48,7 @@ io.on('connection', (socket) => {
       players: 0,
       maxPlayers: maxPlayers,
       game: new Uno(
-        roomUUID, maxPlayers, drawCallback,
+        roomUUID, maxPlayers, setupPlayerCallback, drawCallback,
         unoCallback, wild4ContestCallback, winCallback),
       rounds: [],
     };
@@ -69,7 +69,7 @@ io.on('connection', (socket) => {
       players: 0,
       maxPlayers: 2,
       game: new UnoSP(
-        roomUUID, 2, drawCallback, winCallback, difficulty),
+        roomUUID, 2, setupPlayerCallback, drawCallback, winCallback, difficulty),
       rounds: [],
     };
     rooms.push(newRoom);
@@ -89,7 +89,7 @@ io.on('connection', (socket) => {
       players: 0,
       maxPlayers: 2,
       game: new UnoSP(
-        roomUUID, 2, drawCallback, winCallback, difficulty, true),
+        roomUUID, 2, setupPlayerCallback, drawCallback, winCallback, difficulty, true),
       rounds: [],
     };
     rooms.push(newRoom);
@@ -137,10 +137,6 @@ io.on('connection', (socket) => {
         room.playersUUIDs = room.game.getPlayersUUID();
         // if the room is full, start the game
         room.game.start();
-        // setup game for all players
-        for (const player of room.game.players) {
-          setup(room.game, player);
-        }
         // update room
         updateTurn(room);
         updateBoard(room);
@@ -288,6 +284,7 @@ function setup(game, player) {
     survey,
   );
 }
+const setupPlayerCallback = setup;
 
 function updateBoard(room) {
   // send the room the current board
@@ -315,10 +312,6 @@ function resetRoom(room) {
   if (room.game.isReady()) {
     // if the room is full, start the game
     room.game.start();
-    // setup game for all players
-    for (const player of room.game.players) {
-      setup(room.game, player);
-    }
     // update room
     updateTurn(room);
     updateBoard(room);
@@ -328,8 +321,9 @@ function resetRoom(room) {
 
 // I use callbacks to allow Uno.js to use sockets while still having
 // all sockets related functions in the same file
-function drawCallback(socketId, newCards) {
+function drawCallback(socketId, newCards, roomUUID, drawer) {
   io.to(socketId).emit('draw', newCards);
+  io.to(roomUUID).emit('show_draw', newCards.length, drawer);
 }
 
 function unoCallback(roomUUID) {

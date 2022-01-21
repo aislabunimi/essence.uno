@@ -15,6 +15,7 @@ const darkColorScheme = {
   // used in buttons and alerts
   boxText: '#1c1c1e',
 };
+const fontFamily = 'Montserrat';
 
 const redCardColor = 0xea323c;
 // const blueCardColor = 0x0098dc;
@@ -68,7 +69,7 @@ export default class UIHandler {
       for (const player of players) {
         let playerText = `${player.name} ${player.surname}, 🎴: ${player.hand}, 🏆: ${player.wins}`;
         if (scene.GameHandler.currentTurn === player.turn) {
-          playerText = '▶' + playerText;
+          playerText = '▶ ' + playerText;
         }
         // if editing this x,y values, make sure to update the x,y
         // values in GameHandler.discardServer
@@ -76,7 +77,7 @@ export default class UIHandler {
           700,
           50 + (player.turn * 50),
           playerText,
-          { fontStyle: 'bold', fontSize: '20px', fill: this.colorScheme.text },
+          { fontStyle: 'bold', fontSize: '20px', fill: this.colorScheme.text, wordWrap: { width: 500 }, fontFamily: fontFamily },
         );
         if (!player.connected) {
           this.tintRed(text);
@@ -103,7 +104,7 @@ export default class UIHandler {
         background.x + 10,
         background.y,
         text,
-        { fontStyle: 'bold', fontSize: '50px', fill: this.colorScheme.boxText, align: 'center', wordWrap: { width: 550 } },
+        { fontStyle: 'bold', fontSize: '50px', fill: this.colorScheme.boxText, align: 'center', wordWrap: { width: 550 }, fontFamily: fontFamily },
       );
       alertBoxText.setOrigin(0.5, 0.5);
       let timeoutVar = null;
@@ -213,13 +214,37 @@ export default class UIHandler {
         card.setScale(0);
         scene.tweens.add({
           targets: card,
-          x: scene.dropZone.x,
-          y: scene.dropZone.y,
+          x: scene.dropZone.x + Phaser.Math.Between(-10, 10),
+          y: scene.dropZone.y + Phaser.Math.Between(-10, 10),
           scale: 0.45,
           duration: 250,
         });
         return card;
       };
+
+    this.showDraw = (drawer) => {
+      if (this.drewGroup && this.drewGroup.countActive() > 0) {
+        this.drewGroup.clear(true, true);
+      }
+      else {
+        this.drewGroup = scene.add.group();
+      }
+
+      const card = scene.add.image(
+        scene.deckArea.x,
+        scene.deckArea.y,
+        'Blank_Deck',
+      );
+      card.setScale(0.45);
+      scene.tweens.add({
+        targets: card,
+        x: scene.PlayersBoardGroup.children.entries[drawer].x,
+        y: scene.PlayersBoardGroup.children.entries[drawer].y,
+        scale: 0,
+        duration: 400,
+      });
+      return card;
+    };
 
     this.showButton = (textContent, callback) => {
       if (this.buttonGroup) this.buttonGroup.clear(true, true);
@@ -236,12 +261,21 @@ export default class UIHandler {
         callback();
         // this.GameHandler.sendUno();
       });
+      const scaleX = button.scaleX;
+      const scaleY = button.scaleY;
+      button.on('pointerover', () => {
+        console.log(typeof button);
+        button.setScale(button.scaleX + 0.02, button.scaleY + 0.02);
+        button.once('pointerout', () => {
+          button.setScale(scaleX, scaleY);
+        });
+      });
       this.buttonGroup.add(button);
       const text = scene.add.text(
         button.x,
         button.y,
         textContent,
-        { fontStyle: 'bold', fontSize: '20px', fill: this.colorScheme.boxText, align: 'center' },
+        { fontStyle: 'bold', fontSize: '20px', fill: this.colorScheme.boxText, align: 'center', fontFamily:fontFamily },
       );
       text.setOrigin(0.5, 0.5);
       this.buttonGroup.add(text);
@@ -264,12 +298,21 @@ export default class UIHandler {
         callback();
         // this.GameHandler.sendUno();
       });
+      const scaleX = button.scaleX;
+      const scaleY = button.scaleY;
+      button.on('pointerover', () => {
+        console.log(typeof button);
+        button.setScale(button.scaleX + 0.02, button.scaleY + 0.02);
+        button.once('pointerout', () => {
+          button.setScale(scaleX, scaleY);
+        });
+      });
       this.extraButtonGroup.add(button);
       const text = scene.add.text(
         button.x,
         button.y,
         textContent,
-        { fontStyle: 'bold', fontSize: '20px', fill: this.colorScheme.boxText, align: 'center' },
+        { fontStyle: 'bold', fontSize: '20px', fill: this.colorScheme.boxText, align: 'center', fontFamily:fontFamily },
       );
       text.setOrigin(0.5, 0.5);
       this.extraButtonGroup.add(text);

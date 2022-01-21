@@ -15,9 +15,11 @@ function createRoom(e) {
   ) {
     const roomType = document.getElementById('roomType').value;
     if (roomType == 'multiplayer') {
+      document.cookie = 'gameType="multiplayer"; SameSite=Strict';
       socket.emit('create_room_multiplayer', roomNameInput.value, parseInt(nPlayersInput.value));
     }
     else {
+      document.cookie = 'gameType="singleplayer"; SameSite=Strict';
       const difficulty = document.getElementById('difficulty').value;
       socket.emit('create_room_singleplayer', roomNameInput.value, difficulty);
     }
@@ -41,6 +43,7 @@ function joinRoom(uuid) {
     document.cookie = `name=${document.getElementById('name').value}; SameSite=Strict`;
     document.cookie = `surname=${document.getElementById('surname').value}; SameSite=Strict`;
     document.cookie = `roomUUID=${uuid}; SameSite=Strict`;
+    document.cookie = 'gameType="multiplayer"; SameSite=Strict';
     // submit form
     document.getElementById('form').submit();
   }

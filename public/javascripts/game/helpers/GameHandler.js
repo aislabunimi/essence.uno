@@ -36,6 +36,7 @@ export default class GameHandler {
       this.myTurn = myTurn;
       this.currentTurn = currentTurn;
       this.survey = isSurvey;
+      scene.playerHandGroup.clear(true, true);
       for (const card of cards) {
         scene.UIHandler.addCardPlayerHand(card);
       }
@@ -71,7 +72,9 @@ export default class GameHandler {
         // if it's not my turn, make the card move from the
         // player's name to the discard pile
         scene.UIHandler.addCardDropZone(
-          card, 900, 50 + (this.currentTurn * 50),
+          card,
+          scene.PlayersBoardGroup.children.entries[this.currentTurn].x,
+          scene.PlayersBoardGroup.children.entries[this.currentTurn].y,
         );
       }
     };
@@ -110,6 +113,21 @@ export default class GameHandler {
     this.draw = (cards) => {
       for (const card of cards) {
         scene.UIHandler.addCardPlayerHand(card);
+      }
+    };
+
+    this.canDraw = () => {
+      return this.myTurn === this.currentTurn && this.availableMoves.includes('Draw');
+    };
+
+    this.showDraw = (cardsNumber, drawer) => {
+      if (drawer == this.myTurn) {
+        return;
+      }
+      for (let i = 0; i < cardsNumber; i += 1) {
+        setTimeout(() => {
+          scene.UIHandler.showDraw(drawer);
+        }, 100 * i);
       }
     };
 

@@ -78,7 +78,7 @@ class Player {
 
     this.uuid = uuidv4();
     this.socket = io(config.HOSTNAME);
-    this.socket.emit('join_room', roomUUID, name, 'Computer', this.uuid);
+    this.socket.emit('join_room', roomUUID, name, 'Bot', this.uuid);
 
     /* this.socket.on('connect', () => {
       console.log(`Random player ${this.uuid} joined room ${this.roomUUID}`);

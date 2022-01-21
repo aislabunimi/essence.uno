@@ -127,8 +127,9 @@ function createRoom(name, surname) {
   // saving name & surname
   document.cookie = `name=${name}; SameSite=Strict`;
   document.cookie = `surname=${surname}; SameSite=Strict`;
+  document.cookie = 'gameType="singleplayer"; SameSite=Strict';
   // creating room for game
-  // TODO: change difficulty
+  // TODO: change difficulties
   const difficulty = pickDifficulty();
   socket.emit('create_room_survey', getUUID(), difficulty);
 }

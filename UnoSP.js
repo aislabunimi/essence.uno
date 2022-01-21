@@ -5,7 +5,8 @@ const Deck = require('./utils/Deck');
 const CPUPlayer = require('./players/player');
 
 class UnoSP {
-  constructor(roomUUID, maxPlayers, drawCallback, winCallback, difficulty, isSurvey) {
+  constructor(roomUUID, maxPlayers, setupPlayerCallback,
+    drawCallback, winCallback, difficulty, isSurvey) {
     this.roomUUID = roomUUID;
     this.seed = uuidv4();
     this.rng = seedrandom(this.seed);
@@ -18,6 +19,7 @@ class UnoSP {
     this.started = false;
     this.order = 1;
     this.lastPlayer = null;
+    this.setupPlayerCallback = setupPlayerCallback;
     this.drawCallback = drawCallback;
     this.winCallback = winCallback;
     this.startTime = null;
@@ -171,6 +173,11 @@ class UnoSP {
     this.discard(firstDiscard);
     // set the game started flag to true
     this.started = true;
+    // setup players
+    // setup game for all players
+    for (const player of this.players) {
+      this.setupPlayerCallback(this, player);
+    }
   }
 
   // generates available moves for current player
@@ -289,7 +296,7 @@ class UnoSP {
     /* console.log('game: ');
     console.log(player.hand); */
     // callback to update frontend and draw the new card
-    this.drawCallback(player.socketId, newCards);
+    this.drawCallback(player.socketId, newCards, this.roomUUID, this.currentPlayer);
     // set the player's hasDrawn flag to true
     player.hasDrawn = true;
     // log action: draw
@@ -309,7 +316,7 @@ class UnoSP {
     const newCards =
       Deck.dealCards(this.deck, this.discarded, number, this.seed);
     player.hand.push(...newCards);
-    this.drawCallback(player.socketId, newCards);
+    this.drawCallback(player.socketId, newCards, this.roomUUID, playerNumber);
     // log action: forcedDraw
     this.actions.push({ action:'forcedDraw', res: newCards, target: playerNumber });
   }
