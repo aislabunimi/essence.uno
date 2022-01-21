@@ -5,6 +5,7 @@ export default class GameHandler {
     this.availableMoves = [];
     this.turns = 0;
     this.winner = null;
+    this.survey = true;
 
     this.isMyTurn = () => {
       return this.myTurn === this.currentTurn;
@@ -31,9 +32,10 @@ export default class GameHandler {
       }
     };
 
-    this.setup = (myTurn, currentTurn, cards, discard, hasDrawn) => {
+    this.setup = (myTurn, currentTurn, cards, discard, hasDrawn, isSurvey) => {
       this.myTurn = myTurn;
       this.currentTurn = currentTurn;
+      this.survey = isSurvey;
       for (const card of cards) {
         scene.UIHandler.addCardPlayerHand(card);
       }
@@ -50,7 +52,16 @@ export default class GameHandler {
     this.discardServer = (card) => {
       // if someone else plays a card, clear the UNO button
       this.clearUno();
+      // count turns
       this.turns += 1;
+      // if game is too long, add option to give up
+      if (this.survey && this.turns > 25) {
+        scene.UIHandler.showExtraButton(scene.strings.giveUp, () => {
+          this.surveyGameDone();
+          scene.UIHandler.hideExtraButton();
+        });
+      }
+
       if (this.canPlay(card)) {
         // if it's my turn, make the card appear
         // on top of the discard pile

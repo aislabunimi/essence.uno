@@ -89,7 +89,7 @@ io.on('connection', (socket) => {
       players: 0,
       maxPlayers: 2,
       game: new UnoSP(
-        roomUUID, 2, drawCallback, winCallback, difficulty),
+        roomUUID, 2, drawCallback, winCallback, difficulty, true),
       rounds: [],
     };
     rooms.push(newRoom);
@@ -278,12 +278,14 @@ io.on('connection', (socket) => {
 
 function setup(game, player) {
   // send the player the needed information to play
+  const survey = game.survey ? true : false;
   io.to(player.socketId).emit('setup',
     player.turn,
     game.currentPlayer,
     player.hand,
     game.discarded[game.discarded.length - 1],
     player.hasDrawn,
+    survey,
   );
 }
 

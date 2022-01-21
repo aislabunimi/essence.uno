@@ -250,6 +250,34 @@ export default class UIHandler {
       if (this.buttonGroup) this.buttonGroup.clear(true, true);
     };
 
+    this.showExtraButton = (textContent, callback) => {
+      if (this.extraButtonGroup) this.extraButtonGroup.clear(true, true);
+      this.extraButtonGroup = scene.add.group();
+      const button = scene.add.image(
+        scene.deckArea.x,
+        scene.deckArea.y - scene.deckArea.height + 50,
+        'Blank_Background',
+      );
+      button.setScale(0.4, 0.2);
+      button.setInteractive();
+      button.on('pointerdown', () => {
+        callback();
+        // this.GameHandler.sendUno();
+      });
+      this.extraButtonGroup.add(button);
+      const text = scene.add.text(
+        button.x,
+        button.y,
+        textContent,
+        { fontStyle: 'bold', fontSize: '20px', fill: this.colorScheme.boxText, align: 'center' },
+      );
+      text.setOrigin(0.5, 0.5);
+      this.extraButtonGroup.add(text);
+    };
+    this.hideExtraButton = () => {
+      if (this.extraButtonGroup) this.extraButtonGroup.clear(true, true);
+    };
+
     this.showColorPicker = (card, discardCallback) => {
       // drop zone -> 470, 300, 170, 230
       // image size 562x388 scaled-> 169x117

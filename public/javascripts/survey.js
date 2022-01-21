@@ -93,7 +93,12 @@ function pickSurvey() {
   for (const id in games) {
     const parsedId = parseInt(id);
     const game = games[parsedId];
-    survey.pages[parsedId + 1].description = `The games was won by ${game.winner} in ${game.turns} turns.`;
+    if (game.winner) {
+      survey.pages[parsedId + 1].description = `The games was won by ${game.winner} in ${game.turns} turns.`;
+    }
+    else {
+      survey.pages[parsedId + 1].description = `You gave up after ${game.turns} turns.`;
+    }
   }
   return survey;
 }

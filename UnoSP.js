@@ -5,7 +5,7 @@ const Deck = require('./utils/Deck');
 const CPUPlayer = require('./players/player');
 
 class UnoSP {
-  constructor(roomUUID, maxPlayers, drawCallback, winCallback, difficulty) {
+  constructor(roomUUID, maxPlayers, drawCallback, winCallback, difficulty, isSurvey) {
     this.roomUUID = roomUUID;
     this.seed = uuidv4();
     this.rng = seedrandom(this.seed);
@@ -25,6 +25,7 @@ class UnoSP {
     this.winner = null;
     this.actions = [];
     this.feedback = [];
+    this.survey = isSurvey;
     this.bots = [
       CPUPlayer.create(
         roomUUID,
