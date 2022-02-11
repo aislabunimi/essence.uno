@@ -1,8 +1,14 @@
 const seedrandom = require('seedrandom');
 
-class ABMMT {
+// soft time limit but tries to avoid going over by using the time of the last iteration
+// if currentDelta + lastIterationDelta*2 > maxTime then we stop
+// there's the assumption that the next iteration will take double the time of the previous
+// which is not always true but it's a good approximation from the tests that I've done
+
+
+class ABMMT2 {
   constructor(seed, depth = 5, evalFun = this.evaluate, random = true, maxTime = 3) {
-    this.name = 'ABMMT';
+    this.name = 'ABMMT2';
     this.evalFun = evalFun;
     this.depth = depth;
     this.seed = seed;
@@ -23,8 +29,11 @@ class ABMMT {
 
     let delta = null;
     let deltams = null;
+    let lastDelta = null;
+    let lastDeltams = null;
 
     do {
+      this.lastTime = process.hrtime();
       this.counter = 0;
       const alpha = Number.MIN_SAFE_INTEGER;
       let beta = Number.MAX_SAFE_INTEGER;
@@ -59,11 +68,14 @@ class ABMMT {
       }
       delta = process.hrtime(this.time);
       deltams = delta[0] * 1000 + delta[1] / 1000000;
+      lastDelta = process.hrtime(this.lastTime);
+      lastDeltams = lastDelta[0] * 1000 + lastDelta[1] / 1000000;
+      // console.log(`${deltams} + ${lastDeltams * 2} = ${deltams + lastDeltams * 2} < ${this.maxTime} => ${deltams + lastDeltams * 2 < this.maxTime}`);
       this.depth += 1;
-    } while (deltams < this.maxTime);
+    } while (deltams + lastDeltams * 2 < this.maxTime);
     /* console.log(this.depth);
     console.log(deltams); */
-    // console.log(this.depth);
+    // console.log(`${this.depth} - ${deltams}`);
     this.calls += 1;
     this.depthSum += this.depth;
     this.depth = defaultDepth;
@@ -217,4 +229,4 @@ class ABMMT {
   }
 }
 
-module.exports = ABMMT;
+module.exports = ABMMT2;

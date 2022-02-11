@@ -1,8 +1,11 @@
 const seedrandom = require('seedrandom');
 
-class ABMMT {
+// hard time limit, if the time is over maxTime we stop and return the last
+// completed iteration result
+
+class ABMMT3 {
   constructor(seed, depth = 5, evalFun = this.evaluate, random = true, maxTime = 3) {
-    this.name = 'ABMMT';
+    this.name = 'ABMMT3';
     this.evalFun = evalFun;
     this.depth = depth;
     this.seed = seed;
@@ -17,14 +20,15 @@ class ABMMT {
     const availableMoves = gameState.getAvailableActions();
     const myTurn = gameState.turn;
     const rewardMovesList = [];
+    let lastRewardMovesList = [];
     this.time = process.hrtime();
 
     const defaultDepth = this.depth;
-
-    let delta = null;
-    let deltams = null;
+    let done = true;
+    let first = true;
 
     do {
+      this.lastTime = process.hrtime();
       this.counter = 0;
       const alpha = Number.MIN_SAFE_INTEGER;
       let beta = Number.MAX_SAFE_INTEGER;
@@ -43,7 +47,12 @@ class ABMMT {
           [m],
           alpha,
           beta,
+          first,
         );
+        if (!result) {
+          done = false;
+          break;
+        }
         if (result.reward < best.reward) {
           best = result;
           rewardMovesList.length = 0;
@@ -57,18 +66,22 @@ class ABMMT {
           break;
         }
       }
-      delta = process.hrtime(this.time);
-      deltams = delta[0] * 1000 + delta[1] / 1000000;
+      if (done) {
+        lastRewardMovesList = JSON.parse(JSON.stringify(rewardMovesList));
+      }
       this.depth += 1;
-    } while (deltams < this.maxTime);
+      first = false;
+    } while (done);
     /* console.log(this.depth);
     console.log(deltams); */
-    // console.log(this.depth);
+    const delta = process.hrtime(this.time);
+    const deltams = delta[0] * 1000 + delta[1] / 1000000;
+    // console.log(`${this.depth} - ${deltams}`);
     this.calls += 1;
     this.depthSum += this.depth;
     this.depth = defaultDepth;
 
-    const chosen = this.chooseRandomly(rewardMovesList);
+    const chosen = this.chooseRandomly(lastRewardMovesList);
     // console.log(`${this.counter}`);
     // console.log(gameState.hands[myTurn]);
     // console.log(rewardMovesList);
@@ -77,8 +90,13 @@ class ABMMT {
   }
 
   chooseActionReward(
-    gameState, move, myTurn, depth, moves, alpha, beta,
+    gameState, move, myTurn, depth, moves, alpha, beta, first,
   ) {
+    const delta = process.hrtime(this.time);
+    const deltams = delta[0] * 1000 + delta[1] / 1000000;
+    if (!first && deltams > this.maxTime) {
+      return null;
+    }
     const nextState = gameState.nextState(move);
     if (nextState.isFinal() || depth >= this.depth) {
       return {
@@ -106,7 +124,11 @@ class ABMMT {
           [...moves, m],
           alpha,
           beta,
+          first,
         );
+        if (!result) {
+          return null;
+        }
         if (result.reward > best.reward) {
           best = result;
           rewardMovesList.length = 0;
@@ -138,7 +160,11 @@ class ABMMT {
           [...moves, m],
           alpha,
           beta,
+          first,
         );
+        if (!result) {
+          return null;
+        }
         if (result.reward < best.reward) {
           best = result;
           rewardMovesList.length = 0;
@@ -217,4 +243,4 @@ class ABMMT {
   }
 }
 
-module.exports = ABMMT;
+module.exports = ABMMT3;

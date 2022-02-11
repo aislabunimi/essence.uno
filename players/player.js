@@ -5,6 +5,8 @@ const GreedyMiniMax = require('./algorithms/GreedyMiniMax');
 const GreedyMiniMax2 = require('./algorithms/GreedyMiniMax2');
 const ABMM = require('./algorithms/ABMM');
 const ABMMT = require('./algorithms/ABMMT');
+const ABMMT2 = require('./algorithms/ABMMT2');
+const ABMMT3 = require('./algorithms/ABMMT3');
 
 const Evaluate = require('./gamestate/evaluate');
 
@@ -45,16 +47,30 @@ function create(roomUUID, difficulty, seed, deck) {
       roomUUID, difficulty, seed, deck, algo,
     );
   }
-  case 'ABMMK03' : {
+  case 'ABMMK04' : {
     console.log('creating ABMM player');
-    const algo = new ABMM(seed, 5, Evaluate.setK(0.3));
+    const algo = new ABMM(seed, 5, Evaluate.setK(0.4));
     return new Player(
       roomUUID, difficulty, seed, deck, algo,
     );
   }
-  case 'ABMMTK03' : {
-    console.log('creating ABMMTK03 player');
-    const algo = new ABMMT(seed, 5, Evaluate.setK(0.3), true, 500);
+  case 'ABMMTK04' : {
+    console.log('creating ABMMTK04 player');
+    const algo = new ABMMT(seed, 5, Evaluate.setK(0.4), true, 500);
+    return new Player(
+      roomUUID, difficulty, seed, deck, algo,
+    );
+  }
+  case 'ABMMT2K04' : {
+    console.log('creating ABMMT2K04 player');
+    const algo = new ABMMT2(seed, 5, Evaluate.setK(0.4), true, 500);
+    return new Player(
+      roomUUID, difficulty, seed, deck, algo,
+    );
+  }
+  case 'ABMMT3K04' : {
+    console.log('creating ABMMT3K04 player');
+    const algo = new ABMMT3(seed, 5, Evaluate.setK(0.4), true, 500);
     return new Player(
       roomUUID, difficulty, seed, deck, algo,
     );

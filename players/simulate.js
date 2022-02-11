@@ -10,6 +10,9 @@ const GreedyMiniMax = require('./algorithms/GreedyMiniMax');
 const GreedyMiniMax2 = require('./algorithms/GreedyMiniMax2');
 const MM = require('./algorithms/MM');
 const ABMM = require('./algorithms/ABMM');
+const ABMMT = require('./algorithms/ABMMT');
+const ABMMT2 = require('./algorithms/ABMMT2');
+const ABMMT3 = require('./algorithms/ABMMT3');
 
 const GameState = require('./gamestate/gameState');
 const Evaluate = require('./gamestate/evaluate');
@@ -54,7 +57,7 @@ const start = process.hrtime();
 const res = runSimulation(MiniMax, AlphaBeta, simSeed, 100);
 elapsed_time(start, `${res.winsPerc} - ${res.turnsAvg} - ${res.counterP1} - ${res.counterP2}`); */
 
-const ks = [0.0, 0.05, 0.1, 0.15, 0.2, 0.25,
+/* const ks = [0.0, 0.05, 0.1, 0.15, 0.2, 0.25,
   0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65,
   0.7, 0.75, 0.80, 0.85, 0.9, 0.95, 1, 1.05,
   1.1, 1.15, 1.2, 1.25, 1.3, 1.35, 1.4, 1.45, 1.5,
@@ -66,7 +69,7 @@ for (const k of ks) {
   const start = process.hrtime();
   const res = runSimulation(P1, P2, simSeed, 100);
   elapsed_time(start, `${k.toFixed(2)} -> win%:${res.winsPerc.toFixed(2)} turnAvg:${res.turnsAvg.toFixed(2)}`);
-}
+} */
 
 /* const modules = [
   new GreedyMiniMax(simSeed, 2),
@@ -92,6 +95,15 @@ const modulesAlphaNoRandom = [
 const names4 = ['Alpha1NR', 'Alpha05NR', 'Alpha075NR'];
 const cm4 = confusionMatrix(modulesAlphaNoRandom, simSeed, 100);
 printConfusionMatrix(cm4, names4, 3); */
+
+const modulesTime = [
+  new ABMMT(simSeed, 1, Evaluate.setK(0.4), true, 1),
+  new ABMMT2(simSeed, 1, Evaluate.setK(0.4), true, 1),
+  new ABMMT3(simSeed, 5, Evaluate.setK(0.4), true, 1),
+];
+const namesTime = ['ABMMT', 'ABMMT2', 'ABMMT3'];
+const cm4 = confusionMatrix(modulesTime, simSeed, 10);
+printConfusionMatrix(cm4, namesTime, 3);
 
 
 // create confusion matrix with each algorithm against each other
