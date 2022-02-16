@@ -251,7 +251,7 @@ class UnoSP {
 
     if (player.hand.some(c => c.name === cardToSearchInhand.name)) {
       // log action: discard
-      this.actions.push({ action:'discard', res: card, target: this.currentPlayer });
+      this.actions.push({ action:'discard', res: card, target: this.currentPlayer, timeStamp:(new Date()).toISOString() });
       // find the card in the player's hand
       const cardIndex = player.hand.findIndex(
         c => c.name === cardToSearchInhand.name,
@@ -265,7 +265,7 @@ class UnoSP {
       // the game is over and the player that won is the one that discarded
       if (player.hand.length === 0) {
         // log action: win
-        this.actions.push({ action:'win', target: this.currentPlayer });
+        this.actions.push({ action:'win', target: this.currentPlayer, timeStamp: (new Date()).toISOString() });
         this.endTime = Date.now();
         this.winner = this.currentPlayer;
         player.wins++;
@@ -300,7 +300,7 @@ class UnoSP {
     // set the player's hasDrawn flag to true
     player.hasDrawn = true;
     // log action: draw
-    this.actions.push({ action:'draw', res: newCards, target: this.currentPlayer });
+    this.actions.push({ action:'draw', res: newCards, target: this.currentPlayer, timeStamp: (new Date()).toISOString() });
     /* console.log('deck game:');
     console.log(this.deck.slice(0, 5));
     console.log('hands:');
@@ -318,7 +318,7 @@ class UnoSP {
     player.hand.push(...newCards);
     this.drawCallback(player.socketId, newCards, this.roomUUID, playerNumber);
     // log action: forcedDraw
-    this.actions.push({ action:'forcedDraw', res: newCards, target: playerNumber });
+    this.actions.push({ action:'forcedDraw', res: newCards, target: playerNumber, timeStamp: (new Date()).toISOString() });
   }
 
   // sets the next player's turn
