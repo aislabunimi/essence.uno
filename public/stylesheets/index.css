@@ -46,7 +46,7 @@ button {
   margin: 0 auto;
 }
 .half {
-  width: 90%;
+  width: 50%;
 }
 .centered-table {
   width: 50%;
@@ -70,5 +70,13 @@ button {
   body {
     background-color: #1c1c1e;
     color: white;
+  }
+}
+
+@media only screen 
+and (min-device-width : 320px) 
+and (max-device-width : 480px) {
+  .half {
+    width: 90%;
   }
 }
