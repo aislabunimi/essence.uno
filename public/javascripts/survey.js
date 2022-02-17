@@ -3,14 +3,77 @@ const socket = io();
 
 $('#clearSurveyButton').on('click', clearSurvey);
 
+const difficulties = ['RandomPlay', 'GreedyMiniMax2A075', 'ABMMT3K04', 'ABMMT2K04'];
+
 // https://surveyjs.io/create-survey
-const surveys = [
+/* const surveys = [
   JSON.parse('{"pages":[{"name":"beforePlaying","elements":[{"type":"text","name":"name","title":"What\'s your name?","isRequired":true,"placeHolder":"It doesn\'t need to be the real one"},{"type":"text","name":"surname","title":"What\'s your surname?","isRequired":true,"placeHolder":"It doesn\'t need to be the real one"},{"type":"rating","name":"ownStrength","title":"How strong do you think you are at UNO?","isRequired":true,"rateMin": 0, "rateMax": 10}],"title":"Before playing"}],"completeText":"Play Game 1"}'),
   JSON.parse('{"pages":[{"name":"beforePlaying","elements":[{"type":"text","name":"name","title":"What\'s your name?","isRequired":true,"readOnly":true,"placeHolder":"It doesn\'t need to be the real one"},{"type":"text","name":"surname","title":"What\'s your surname?","isRequired":true,"readOnly":true,"placeHolder":"It doesn\'t need to be the real one"},{"type":"rating","name":"ownStrength","title":"How strong do you think you are at UNO?","isRequired":true,"rateMin": 0, "rateMax": 10}],"title":"Before playing"},{"name":"afterGame1","elements":[{"type":"rating","name":"bot1Strength","title":"How strong was the opponent?","rateMin": 0, "rateMax": 10},{"type":"rating","name":"bot1Fun","title":"How much fun did you have?","rateMin":0,"rateMax":10}],"title":"First game","description":"Please answer with information regarding the first game"}],"completeText":"Play Game 2"}'),
   JSON.parse('{"pages":[{"name":"beforePlaying","elements":[{"type":"text","name":"name","title":"What\'s your name?","isRequired":true,"readOnly":true,"placeHolder":"It doesn\'t need to be the real one"},{"type":"text","name":"surname","title":"What\'s your surname?","isRequired":true,"readOnly":true,"placeHolder":"It doesn\'t need to be the real one"},{"type":"rating","name":"ownStrength","title":"How strong do you think you are at UNO?","isRequired":true,"rateMin": 0, "rateMax": 10}],"title":"Before playing"},{"name":"afterGame1","elements":[{"type":"rating","name":"bot1Strength","title":"How strong was the opponent?","rateMin": 0, "rateMax": 10},{"type":"rating","name":"bot1Fun","title":"How much fun did you have?","rateMin":0,"rateMax":10}],"title":"First game","description":"Please answer with information regarding the first game"},{"name":"afterGame2","elements":[{"type":"rating","name":"bot2Strength","title":"How strong was the opponent?","rateMin": 0, "rateMax": 10},{"type":"rating","name":"bot2Fun","title":"How much fun did you have?","rateMin":0,"rateMax":10}],"title":"Second game","description":"Please answer with information regarding the second game"}],"completeText":"Play Game 3"}'),
   JSON.parse('{"pages":[{"name":"beforePlaying","elements":[{"type":"text","name":"name","title":"What\'s your name?","isRequired":true,"readOnly":true,"placeHolder":"It doesn\'t need to be the real one"},{"type":"text","name":"surname","title":"What\'s your surname?","isRequired":true,"readOnly":true,"placeHolder":"It doesn\'t need to be the real one"},{"type":"rating","name":"ownStrength","title":"How strong do you think you are at UNO?","isRequired":true,"rateMin": 0, "rateMax": 10}],"title":"Before playing"},{"name":"afterGame1","elements":[{"type":"rating","name":"bot1Strength","title":"How strong was the opponent?","rateMin": 0, "rateMax": 10},{"type":"rating","name":"bot1Fun","title":"How much fun did you have?","rateMin":0,"rateMax":10}],"title":"First game","description":"Please answer with information regarding the first game"},{"name":"afterGame2","elements":[{"type":"rating","name":"bot2Strength","title":"How strong was the opponent?","rateMin": 0, "rateMax": 10},{"type":"rating","name":"bot2Fun","title":"How much fun did you have?","rateMin":0,"rateMax":10}],"title":"Second game","description":"Please answer with information regarding the second game"},{"name":"AfterGame3","elements":[{"type":"rating","name":"bot3Strength","title":"How strong was the opponent?","rateMin": 0, "rateMax": 10},{"type":"rating","name":"bot3Fun","title":"How much fun did you have?","rateMin":0,"rateMax":10}],"title":"Third game","description":"Please answer with information regarding the third game"},{"name":"afterPlaying","elements":[{"type":"ranking","name":"sortDifficulty","title":"Sort the games by how difficult they were","choices":[{"value":"game1","text":"Game 1"},{"value":"game2","text":"Game 2"},{"value":"game3","text":"Game 3"}]},{"type":"ranking","name":"sortFun","title":"Sort the games by how fun they were","choicesFromQuestion": "sortDifficulty"}],"title":"After playing"}],"completeText":"Done"}'),
-];
-const difficulties = ['RandomPlay', 'GreedyMiniMax2A075', 'ABMMT3K04'];
+]; */
+// survey generation
+const surveyBaseString = '{"pages":[],"completeText":"Next"}';
+const pages = [];
+const firstPageString = '{"name":"beforePlaying","elements":[{"type":"text","name":"name","title":"What\'s your name?","isRequired":true,"placeHolder":"It doesn\'t need to be the real one"},{"type":"text","name":"surname","title":"What\'s your surname?","isRequired":true,"placeHolder":"It doesn\'t need to be the real one"},{"type":"rating","name":"ownStrength","title":"How strong do you think you are at UNO?","isRequired":true,"rateMin": 0, "rateMax": 10}],"title":"Before playing"}';
+// const lastPageString = '{"name":"afterPlaying","elements":[{"type":"ranking","name":"sortDifficulty","title":"Sort the games by how difficult they were","choices":[{"value":"game1","text":"Game 1"},{"value":"game2","text":"Game 2"},{"value":"game3","text":"Game 3"}]},{"type":"ranking","name":"sortFun","title":"Sort the games by how fun they were","choicesFromQuestion": "sortDifficulty"}],"title":"After playing"}';
+pages.push(JSON.parse(firstPageString));
+// generate pages for each game
+for (const key in difficulties) {
+  const number = parseInt(key, 10);
+  const page = {
+    name: `afterGame${number + 1}`,
+    elements: [
+      {
+        type: 'rating',
+        name: 'bot' + (number + 1) + 'Strength',
+        title: 'How strong was the opponent?',
+        rateMin: 0,
+        rateMax: 10,
+      },
+      {
+        type: 'rating',
+        name: 'bot' + (number + 1) + 'Fun',
+        title: 'How much fun did you have?',
+        rateMin: 0,
+        rateMax: 10,
+      },
+    ],
+    title: `Game ${number + 1}`,
+    description: 'Please answer with information regarding the game ' + (number + 1),
+  };
+  pages.push(page);
+}
+// generate last page
+const choices = [];
+for (const key in difficulties) {
+  const number = parseInt(key, 10);
+  const choice = {
+    value: `game${number + 1}`,
+    text: `Game ${number + 1}`,
+  };
+  choices.push(choice);
+}
+const lastPage = {
+  name: 'afterPlaying',
+  elements: [
+    {
+      type: 'ranking',
+      name: 'sortDifficulty',
+      title: 'Sort the games by how difficult they were',
+      choices: choices,
+    },
+    {
+      type: 'ranking',
+      name: 'sortFun',
+      title: 'Sort the games by how fun they were',
+      choicesFromQuestion: 'sortDifficulty',
+    },
+  ],
+  title: 'After playing',
+};
+pages.push(lastPage);
+
 initializeSurvey();
 
 function initializeSurvey() {
@@ -92,8 +155,26 @@ function initializeSurvey() {
 
 function pickSurvey() {
   const gameNumber = window.localStorage.getItem('gameNumber');
+
+  const survey = JSON.parse(surveyBaseString);
+  // update complete text to match game
+  if (parseInt(gameNumber, 10) === difficulties.length) {
+    survey.completeText = 'Done';
+  }
+  else {
+    survey.completeText = 'Play game ' + (parseInt(gameNumber, 10) + 1);
+  }
+
+  // add pages until gameNumber
+  for (let i = 0; i <= gameNumber; i++) {
+    survey.pages.push(pages[i]);
+  }
+  // add last page if done with games
+  if (parseInt(gameNumber, 10) === difficulties.length) {
+    survey.pages.push(pages[pages.length - 1]);
+  }
   // update description with games data
-  const survey = surveys[gameNumber];
+  // const survey = surveys[gameNumber];
   const games = JSON.parse(window.localStorage.getItem('games'));
   for (const id in games) {
     const parsedId = parseInt(id);
