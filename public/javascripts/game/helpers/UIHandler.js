@@ -88,6 +88,8 @@ export default class UIHandler {
 
     this.buildAlertBox = (text, accept, refuse, timeout) => {
       if (scene.alertBoxGroup) scene.alertBoxGroup.clear(true, true);
+      // disable buttons and ability to draw while alert box is active
+      this.disableButtonsAndDrawing();
       if (scene.playerHandGroup) {
         for (const card of scene.playerHandGroup.getChildren()) {
           card.disableInteractive();
@@ -152,6 +154,8 @@ export default class UIHandler {
     };
     this.hideAlertBox = () => {
       scene.alertBoxGroup.clear(true, true);
+      // enable buttons after alert box is closed
+      this.enableButtonsAndDrawing();
       if (scene.playerHandGroup) {
         for (const card of scene.playerHandGroup.getChildren()) {
           card.setInteractive();
@@ -264,7 +268,6 @@ export default class UIHandler {
       const scaleX = button.scaleX;
       const scaleY = button.scaleY;
       button.on('pointerover', () => {
-        console.log(typeof button);
         button.setScale(button.scaleX + 0.02, button.scaleY + 0.02);
         button.once('pointerout', () => {
           button.setScale(scaleX, scaleY);
@@ -301,7 +304,6 @@ export default class UIHandler {
       const scaleX = button.scaleX;
       const scaleY = button.scaleY;
       button.on('pointerover', () => {
-        console.log(typeof button);
         button.setScale(button.scaleX + 0.02, button.scaleY + 0.02);
         button.once('pointerout', () => {
           button.setScale(scaleX, scaleY);
@@ -324,6 +326,9 @@ export default class UIHandler {
     this.showColorPicker = (card, discardCallback) => {
       // drop zone -> 470, 300, 170, 230
       // image size 562x388 scaled-> 169x117
+      if (this.colorPickerGroup) this.colorPickerGroup.clear(true, true);
+      // when color picker is shown, disable buttons and ability to draw
+      this.disableButtonsAndDrawing();
       const colors = ['Red', 'Blue', 'Yellow', 'Green'];
       const coords = [
         { x: 400, y: 225 }, { x: 550, y: 225 },
@@ -348,6 +353,12 @@ export default class UIHandler {
         colorCard.on('pointerdown', () => {
           discardCallback(colorCard.rep);
         });
+        colorCard.on('pointerover', () => {
+          colorCard.setScale(colorCard.scale + 0.02);
+          colorCard.once('pointerout', () => {
+            colorCard.setScale(0.3);
+          });
+        });
         scene.colorPickerGroup.add(colorCard);
       }
       // add animation when showing color picker
@@ -365,6 +376,8 @@ export default class UIHandler {
         scale: 0,
         duration: 250,
       });
+      // when color picker is hidden, enable buttons and ability to draw
+      this.enableButtonsAndDrawing();
       // clear color picker group
       scene.colorPickerGroup.clear(true, true);
     };
@@ -390,6 +403,34 @@ export default class UIHandler {
       scene.dropGroup.clear(true, true);
       scene.playerHandGroup.clear(true, true);
       this.buildAlertBox('Waiting for \nplayers...');
+    };
+
+    this.disableButtonsAndDrawing = () => {
+      if (this.buttonGroup) {
+        for (const child of this.buttonGroup.getChildren()) {
+          child.disableInteractive();
+        }
+      }
+      if (this.extraButtonGroup) {
+        for (const child of this.extraButtonGroup.getChildren()) {
+          child.disableInteractive();
+        }
+      }
+      scene.deckArea.card.disableInteractive();
+    };
+
+    this.enableButtonsAndDrawing = () => {
+      if (this.buttonGroup) {
+        for (const child of this.buttonGroup.getChildren()) {
+          child.setInteractive();
+        }
+      }
+      if (this.extraButtonGroup) {
+        for (const child of this.extraButtonGroup.getChildren()) {
+          child.setInteractive();
+        }
+      }
+      scene.deckArea.card.setInteractive();
     };
 
     this.tintRed = (gameObject) => {
