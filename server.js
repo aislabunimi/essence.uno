@@ -1,5 +1,6 @@
 const config = require('./config/config.js');
-const gameMongoose = require('./models/game.js');
+const gameMongoose = require('./models/game.js').model;
+const surveyMongoose = require('./models/survey.js').model;
 const { v4: uuidv4 } = require('uuid');
 
 const app = require('./app');
@@ -96,7 +97,7 @@ io.on('connection', (socket) => {
     socket.emit('room_created', newRoom.uuid);
   });
 
-  socket.on('join_room', (roomUUID, name, surname, uuid) => {
+  socket.on('join_room', (roomUUID, name, surname, uuid, bot) => {
     console.log(`${roomUUID}: joined by ${name} ${surname} (${uuid})`);
     // find room the user want to join
     const room = rooms.find((r) => r.uuid === roomUUID);
@@ -131,7 +132,7 @@ io.on('connection', (socket) => {
         return;
       }
       // adding player to game
-      room.game.addPlayer(socket.id, name, surname, uuid);
+      room.game.addPlayer(socket.id, name, surname, uuid, bot);
       if (room.game.isReady()) {
         // save the players uuids
         room.playersUUIDs = room.game.getPlayersUUID();
@@ -227,12 +228,30 @@ io.on('connection', (socket) => {
     room.game.giveFeedback(k, v);
   });
 
-  socket.on('survey_results', (results) => {
+  socket.on('survey_results', async (results) => {
     // TODO: save the survey results on db once the survey structure is done
     console.log(results);
+    // converting the results answers into an array of questions to fit the db model
+    const surveyAnswers = [];
+    for (const ans of results.answers) {
+      surveyAnswers.push({
+        id: ans.name,
+        question: ans.title,
+        answer: JSON.stringify(ans.value),
+      });
+    }
+    const old_data = await surveyMongoose.findById(results.id);
+    if (old_data) {
+      console.log('found old data for this survey, updating it');
+      surveyMongoose.updateSurvey(results.id, new Date(), surveyAnswers);
+    }
+    else {
+      console.log('old data not found, inserting new survey');
+      surveyMongoose.insertNewSurvey(results.id, [], new Date(), new Date(), surveyAnswers);
+    }
   });
 
-  socket.on('disconnect', () => {
+  socket.on('disconnect', async () => {
     // console.log('user disconnected:', socket.id);
     // find room the user was in
     const room = rooms.find((r) => r.uuid === roomUUIDSocket);
@@ -252,6 +271,23 @@ io.on('connection', (socket) => {
       if (room.players === 0) {
         room.rounds.push(room.game.round());
         room.endTime = Date.now();
+        // if we are in a survey, adding game to survey
+        if (room.type.includes('survey')) {
+          console.log('adding game to survey');
+          // retrieving real player uuid
+          const realPlayerUUID = room.game.players.find((p) => p.isBot === false).uuid;
+          const game = gameMongoose.createNewgame(
+            room.uuid,
+            room.playersUUIDs,
+            room.type,
+            room.startTime,
+            room.endTime,
+            room.rounds,
+          );
+          // add game to survey
+          surveyMongoose.addGame(realPlayerUUID, game);
+        }
+
         console.log('Saving game data on db');
         gameMongoose.insertNewGame(
           room.uuid,

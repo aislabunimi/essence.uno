@@ -56,13 +56,17 @@ function initializeSurvey() {
   });
 
   function completeSurvey(s) {
-    // send Ajax request to your web server.
+    // sending data to server using socket
     const data = s.data;
+    const dataToSend = {
+      id: getCookie('uuid').slice(2),
+      answers: s.getPlainData(),
+    };
     data.id = getCookie('uuid').slice(2);
     data.pageNo = s.currentPageNo;
     data.difficulties = difficulties;
-    socket.emit('survey_results', data);
-    console.log('The final results are:' + JSON.stringify(data));
+    socket.emit('survey_results', dataToSend);
+    console.log('The final results are:' + JSON.stringify(dataToSend));
     // TODO: save data somewhere
     // go to game if not done
     if (window.localStorage.getItem('gameNumber') < difficulties.length) {
@@ -83,7 +87,6 @@ function initializeSurvey() {
     window.localStorage.setItem('survey', JSON.stringify(data));
 
     data.id = getCookie('uuid').slice(2);
-    console.log('The results are:' + JSON.stringify(data));
   }
 }
 

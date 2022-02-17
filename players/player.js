@@ -94,7 +94,7 @@ class Player {
 
     this.uuid = uuidv4();
     this.socket = io(config.HOSTNAME);
-    this.socket.emit('join_room', roomUUID, name, 'Bot', this.uuid);
+    this.socket.emit('join_room', roomUUID, name, 'Bot', this.uuid, true);
 
     /* this.socket.on('connect', () => {
       console.log(`Random player ${this.uuid} joined room ${this.roomUUID}`);
@@ -217,6 +217,13 @@ class Player {
       this.socket.disconnect();
     }, 30_000);
   }
+
+  /*  leaveNow() {
+    // called by the object owner when the other player leaves
+    // disconnect immediately
+    console.log('Bot: leaving');
+    this.socket.disconnect();
+  } */
 
   cancelLeave() {
     console.log('Bot: leaving canceled');

@@ -63,7 +63,7 @@ class UnoSP {
   }
 
   // adds a new player to the game and initializes it
-  addPlayer(socketId, name, surname, uuid) {
+  addPlayer(socketId, name, surname, uuid, isBot) {
     this.players.push({
       socketId: socketId,
       uuid: uuid,
@@ -74,6 +74,7 @@ class UnoSP {
       hand: [],
       hasDrawn: false,
       wins: 0,
+      isBot: isBot === true ? true : false,
     });
   }
   // get a player from their uuid
@@ -270,6 +271,12 @@ class UnoSP {
         this.winner = this.currentPlayer;
         player.wins++;
         this.winCallback(this.roomUUID, `${player.name} ${player.surname}`);
+        /* // tell the bots to leave, game is finished if the game is a survey
+        if (this.survey) {
+          for (const b of this.bots) {
+            b.leaveNow();
+          }
+        } */
       }
     }
     else {
