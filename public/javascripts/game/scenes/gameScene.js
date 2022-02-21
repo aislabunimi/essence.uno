@@ -35,7 +35,7 @@ export default class GameScene extends Phaser.Scene {
     this.load.image('Red_No', 'images/assets/buttons/Red_No.svg');
 
     // setting strings
-    this.strings = {
+    /* this.strings = {
       waiting: 'Waiting for \nplayers...',
       skip: 'Your turn was \nskipped',
       reverse: 'The direction \nof the game \nhas been reversed',
@@ -53,8 +53,22 @@ export default class GameScene extends Phaser.Scene {
       giveUp: 'Give up?',
       surveyGameDone: 'Thanks for playing!',
       end: 'won!',
+    }; */
+    this.strings = {
+      waiting: 'In attesa dei\ngiocatori...',
+      pass: 'Passa',
+      uno: 'Uno!',
+      contestUno: 'Contesta Uno!',
+      contest4: 'Contesta +4?',
+      disconnected: 'Sei stato disconnesso',
+      full: 'La stanza è piena',
+      funFeedback: 'Ti sei divertito?',
+      hardFeedback: 'La partita era difficile?',
+      restartSoon: 'La partita si riavvierà presto',
+      giveUp: 'Arrendersi?',
+      surveyGameDone: 'Grazie di aver giocato!',
+      end: 'ha vinto!',
     };
-
   }
 
   create() {
