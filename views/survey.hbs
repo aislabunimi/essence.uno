@@ -2,6 +2,28 @@
   <div class="half centered dark">
     <h1>Uno</h1>
     <h2>Survey</h2>
+    <div id="survey-information" style="text-align: left;">
+      <h3>Informazioni generali</h3>
+      L'obbiettivo di questo sondaggio è di raccogliere informazioni su quanto può essere divertente giocare ad UNO contro una intelligenza artificiale(AI).<br>
+      Questo progetto di ricerca è sviluppato da Francesco Torgano per l'Università degli Studi di Milano.<br>
+      I dati raccolti saranno utilizzati per migliorare il gioco, migliorare l'esperienza di gioco e come studio da aggiungere alla tesi. <br>
+      Le risposte sono confidenziali e non verrano salvate informazioni che potrebbero identificare gli utenti come nome o indirizzo IP.<br>
+      Le domande del sondaggio riguarderanno principalmente la sua opinione sulle partite e su come le valuteresti. <br>
+      La partecipazione in questo sondaggio è completamente volontaria e cliccando su "Gioca partita 1" accetti di partecipare al sondaggio.<br>
+      <h3>Regole di gioco</h3>
+      La maggior parte delle regole sono uguali alle <a href="https://it.wikipedia.org/wiki/UNO_(gioco_di_carte)#Come_giocare" target="_blank">regole ufficiali di uno.</a> <br>
+      <h4>Regole principali</h4>
+      - Nel proprio turno, il giocatore può:<br>
+        &nbsp;-- giocare una carta delle stesso colore, numero o simbolo. <br>
+        &nbsp;-- giocare una carta Jolly o Jolly Pesca Quattro.<br>
+        &nbsp;-- Pescare una carta dal mazzo, giocarla se possibile. <br>
+      - Un giocatore che pesca dal mazzo deve giocare la carta pescata(non può giocare altre carte) o tenerla. <br>
+      - Il primo giocatore a scartare tutte le carte, vince la partita. <br>      
+      <h4>Differenze rispetto alle regole tradizionali</h4>
+      - Le "regole sociali" del gioco non sono presenti (dire "UNO!", contestare le carte Jolly Pesca Quattro). <br>
+      - Il giocatore può giocare la carta Jolly Pesca Quattro senza restrizioni. <br>
+      - Il giocatore può arrendersi tramite il bottone "Arrendersi?" dopo un certo numero di turni. <br>
+    </div>
     {{!-- <form method="post" id="form" action="/gameSurvey">
       <p>
         Survey
@@ -13,9 +35,9 @@
     </form> --}}
     <div id="survey"></div>
     <div id="survey-complete" hidden>
-      <h3>Thanks for completing the survey!</h3>
+      <h3>Grazie per aver completato il sondaggio</h3>
       <button id="clearSurveyButton">
-        Clear survey data
+        Elimina dati sondaggio
       </button>
     </div>
     <form method="post" id="form" action="/game">
@@ -29,6 +51,9 @@
   <link href="https://unpkg.com/survey-jquery@1.9.5/survey.css" type="text/css" rel="stylesheet" />
   <script src="https://code.jquery.com/jquery-3.6.0.slim.min.js" integrity="sha256-u7e5khyithlIdTpu22PHhENmPcRdFiHRjhAuHcs05RI=" crossorigin="anonymous"></script>
   <script src="https://unpkg.com/survey-jquery@1.9.5/survey.jquery.min.js"></script>
+  <script src="https://unpkg.com/nouislider@9.2.0/distribute/nouislider.js"></script>
+  <link href="https://unpkg.com/nouislider@9.2.0/distribute/nouislider.min.css" rel="stylesheet"/>
+  <script src="https://unpkg.com/surveyjs-widgets@1.9.14/surveyjs-widgets.min.js"></script>
   <script src="javascripts/survey.js"></script>
 </body>
 

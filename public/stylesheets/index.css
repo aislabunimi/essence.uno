@@ -25,6 +25,13 @@ select {
   width: 50%;
 }
 
+a:visited {
+  color: #6495ed;
+}
+h4 {
+  margin: 5px 0px;
+}
+
 button {
   /* remove default behavior */
   appearance: none;

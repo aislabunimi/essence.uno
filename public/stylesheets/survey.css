@@ -53,7 +53,9 @@ input[type=button]{
 .sv-ranking-item__content{
   background-color: var(--background) !important;
   color: var(--text) !important;
+  font-family: "Montserrat", sans-serif !important;
 }
+
 .sv-ranking-item__index {
   /* background-color: var(--background) !important; */
   color: var(--text) !important;
@@ -79,6 +81,19 @@ div.sv-ranking:nth-child(8) {
 }
 .sv_row > div {
   min-width: 0 !important;
+}
+.noUi-connect {
+  background: var(--accent) none repeat scroll 0% 0% !important;
+}
+.sv_q.sv_qstn {
+  padding-bottom: 10px !important;
+}
+.sv_q.sv_qstn > div > div {
+  padding-top: 10px !important;
+  padding-bottom: 10px !important;
+}
+.sv-boolean__slider {
+  margin-right: 37px !important;
 }
 
 
