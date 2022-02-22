@@ -8,7 +8,7 @@ router.get('/', function(req, res, next) {
     layout:'empty',
     styles: ['index.css'],
     title:'Index',
-    rooms: req.app.get('rooms'),
+    rooms: req.app.get('rooms').filter(room => room.type.includes('multiplayer')),
   });
 });
 
