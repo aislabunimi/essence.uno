@@ -36,7 +36,6 @@ class UnoSP {
         Deck.shuffleCardsSeeded(Deck.createDeck(), this.currentRNG),
       ),
     ];
-    console.log(this.seed);
   }
 
   reset() {
@@ -271,12 +270,12 @@ class UnoSP {
         this.winner = this.currentPlayer;
         player.wins++;
         this.winCallback(this.roomUUID, `${player.name} ${player.surname}`);
-        /* // tell the bots to leave, game is finished if the game is a survey
+        // tell the bots to leave, game is finished if the game is a survey
         if (this.survey) {
           for (const b of this.bots) {
             b.leaveNow();
           }
-        } */
+        }
       }
     }
     else {

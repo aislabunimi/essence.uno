@@ -56,21 +56,21 @@ function create(roomUUID, difficulty, seed, deck) {
   }
   case 'ABMMTK04' : {
     console.log('creating ABMMTK04 player');
-    const algo = new ABMMT(seed, 5, Evaluate.setK(0.4), true, 500);
+    const algo = new ABMMT(seed, 0, Evaluate.setK(0.4), true, 100);
     return new Player(
       roomUUID, difficulty, seed, deck, algo,
     );
   }
   case 'ABMMT2K04' : {
     console.log('creating ABMMT2K04 player');
-    const algo = new ABMMT2(seed, 5, Evaluate.setK(0.4), true, 500);
+    const algo = new ABMMT2(seed, 0, Evaluate.setK(0.4), true, 100);
     return new Player(
       roomUUID, difficulty, seed, deck, algo,
     );
   }
   case 'ABMMT3K04' : {
     console.log('creating ABMMT3K04 player');
-    const algo = new ABMMT3(seed, 5, Evaluate.setK(0.4), true, 500);
+    const algo = new ABMMT3(seed, 0, Evaluate.setK(0.4), true, 100);
     return new Player(
       roomUUID, difficulty, seed, deck, algo,
     );
@@ -218,12 +218,12 @@ class Player {
     }, 30_000);
   }
 
-  /*  leaveNow() {
+  leaveNow() {
     // called by the object owner when the other player leaves
     // disconnect immediately
     console.log('Bot: leaving');
     this.socket.disconnect();
-  } */
+  }
 
   cancelLeave() {
     console.log('Bot: leaving canceled');
