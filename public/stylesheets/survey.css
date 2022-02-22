@@ -95,6 +95,9 @@ div.sv-ranking:nth-child(8) {
 .sv-boolean__slider {
   margin-right: 37px !important;
 }
+#survey-information{
+  padding-bottom: 20px;
+}
 
 
 @media (prefers-color-scheme: dark) {
