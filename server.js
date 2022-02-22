@@ -229,15 +229,13 @@ io.on('connection', (socket) => {
   });
 
   socket.on('survey_results', async (results) => {
-    // TODO: save the survey results on db once the survey structure is done
-    console.log(results);
     // converting the results answers into an array of questions to fit the db model
     const surveyAnswers = [];
     for (const ans of results.answers) {
       surveyAnswers.push({
         id: ans.name,
         question: ans.title,
-        answer: JSON.stringify(ans.value),
+        answer: [JSON.stringify(ans.value)],
       });
     }
     const old_data = await surveyMongoose.findById(results.id);

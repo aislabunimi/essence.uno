@@ -25,21 +25,50 @@ surveySchema.statics.insertNewSurvey =
   };
 
 surveySchema.statics.updateSurvey = function(surveyid, lastupdate, questions, cb) {
-  return this.updateOne({ surveyid }, { lastupdate, questions }, (err, res) => {
+  // get the survey
+  return this.findOne({ surveyid }, (err, surveyDb) => {
     if (err) {
-      console.log(err);
+      return cb(err);
     }
-    else {
-      console.log('surveymodel: updated survey');
+    // update the survey
+    surveyDb.lastupdate = lastupdate;
+    // console.log('surveymodel: updating survey');
+    // console.log(surveyDb);
+    // update each question in the survey
+    for (let i = 0; i < questions.length; i++) {
+      const question = questions[i];
+      const questionId = question.id;
+      const index = surveyDb.questions.findIndex(q => q.id === questionId);
+      if (index === -1) {
+        surveyDb.questions.push(question);
+      }
+      else {
+        // console.log('surveymodel: array:');
+        const answerArray = surveyDb.questions[index].answer;
+        if (answerArray[answerArray.length - 1] !== question.answer[0]) {
+          answerArray.push(question.answer[0]);
+        }
+        // console.log(surveyDb.questions[index].answer);
+        // console.log(question.answer);
+        // surveyDb.questions[index].answer.push(question.answer[0]);
+      }
     }
+    surveyDb.save((err, res) => {
+      if (err) {
+        console.log('surveymodel: error saving survey -> ' + err);
+      }
+      else {
+        console.log('surveymodel: survey updated');
+      }
+    });
   });
 };
 
 surveySchema.statics.addGame = function(surveyid, game, cb) {
-  console.log('surveymodel: adding game to survey');
+  // console.log('surveymodel: adding game to survey');
   return this.updateOne({ surveyid }, { $push: { games: game } }, (err, res) => {
     if (err) {
-      console.log(err);
+      console.log('surveymodel: error adding game to survey -> ' + err);
     }
     else {
       console.log('surveymodel: added game to survey');
