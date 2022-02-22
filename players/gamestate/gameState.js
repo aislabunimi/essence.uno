@@ -112,7 +112,7 @@ class GameState {
         actions.push({ type: 'Draw_Play', card: drawable[0] });
       }
     }
-    
+
     // Draw_Pass
     actions.push({ type: 'Draw_Pass' });
 

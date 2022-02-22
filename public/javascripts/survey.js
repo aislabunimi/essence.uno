@@ -13,7 +13,7 @@ const difficulties = ['RandomPlay', 'GreedyMiniMax2A075', 'ABMMT2K04', 'ABMMT2K0
   JSON.parse('{"pages":[{"name":"beforePlaying","elements":[{"type":"text","name":"name","title":"What\'s your name?","isRequired":true,"readOnly":true,"placeHolder":"It doesn\'t need to be the real one"},{"type":"text","name":"surname","title":"What\'s your surname?","isRequired":true,"readOnly":true,"placeHolder":"It doesn\'t need to be the real one"},{"type":"rating","name":"ownStrength","title":"How strong do you think you are at UNO?","isRequired":true,"rateMin": 0, "rateMax": 10}],"title":"Before playing"},{"name":"afterGame1","elements":[{"type":"rating","name":"bot1Strength","title":"How strong was the opponent?","rateMin": 0, "rateMax": 10},{"type":"rating","name":"bot1Fun","title":"How much fun did you have?","rateMin":0,"rateMax":10}],"title":"First game","description":"Please answer with information regarding the first game"},{"name":"afterGame2","elements":[{"type":"rating","name":"bot2Strength","title":"How strong was the opponent?","rateMin": 0, "rateMax": 10},{"type":"rating","name":"bot2Fun","title":"How much fun did you have?","rateMin":0,"rateMax":10}],"title":"Second game","description":"Please answer with information regarding the second game"},{"name":"AfterGame3","elements":[{"type":"rating","name":"bot3Strength","title":"How strong was the opponent?","rateMin": 0, "rateMax": 10},{"type":"rating","name":"bot3Fun","title":"How much fun did you have?","rateMin":0,"rateMax":10}],"title":"Third game","description":"Please answer with information regarding the third game"},{"name":"afterPlaying","elements":[{"type":"ranking","name":"sortDifficulty","title":"Sort the games by how difficult they were","choices":[{"value":"game1","text":"Game 1"},{"value":"game2","text":"Game 2"},{"value":"game3","text":"Game 3"}]},{"type":"ranking","name":"sortFun","title":"Sort the games by how fun they were","choicesFromQuestion": "sortDifficulty"}],"title":"After playing"}],"completeText":"Done"}'),
 ]; */
 // survey generation
-const surveyBaseString = '{"pages":[],"completeText":"Prossima","pagePrevText": "Precedente","pageNextText": "Successiva","completedHtml": "<h3>Caricamento partita...</h3>"}';
+const surveyBaseString = '{"pages":[],"completeText":"Prossima","pagePrevText": "Precedente","pageNextText": "Successiva","completedHtml": "<h3>Caricamento partita...</h3>","locale": "it"}';
 const pages = [];
 const firstPage = {
   name: 'beforePlaying',
@@ -23,7 +23,6 @@ const firstPage = {
       name: 'name',
       title: 'Inserisci un username',
       isRequired: true,
-      placeHolder: 'Insert username',
     },
     {
       type: 'nouislider',
@@ -36,6 +35,7 @@ const firstPage = {
       pipsText: [{ value:0, text:'Scarso' }, { value:50, text:'Nella media' }, { value:100, text:'Forte' }],
       pipsDensity: 100,
       tooltips: false,
+      isRequired: true,
     },
     {
       type: 'nouislider',
@@ -48,6 +48,7 @@ const firstPage = {
       pipsText: [{ value:0, text:'Noioso' }, { value:50, text:'Normale' }, { value:100, text:'Divertente' }],
       pipsDensity: 100,
       tooltips: false,
+      isRequired: true,
     },
     {
       type: 'rating',
@@ -56,6 +57,7 @@ const firstPage = {
       step: 1,
       rateMin: 0,
       rateMax: difficulties.length,
+      isRequired: true,
     },
   ],
   title: 'Prepartita',
@@ -80,6 +82,7 @@ for (const key in difficulties) {
         pipsText: [{ value:0, text:'Scarso' }, { value:50, text:'Nella media' }, { value:100, text:'Forte' }],
         pipsDensity: 100,
         tooltips: false,
+        isRequired: true,
       },
       {
         type: 'boolean',
@@ -87,6 +90,8 @@ for (const key in difficulties) {
         title: 'Saresti in grado di capire se hai giocato contro una IA o contro un giocatore umano?',
         labelTrue: 'Sì',
         // defaultValue: 'true',
+        labelFalse: 'No',
+        isRequired: true,
       },
       {
         type: 'nouislider',
@@ -99,16 +104,18 @@ for (const key in difficulties) {
         pipsText: [{ value:0, text:'Poco' }, { value:50, text:'Nella media' }, { value:100, text:'Tanto' }],
         pipsDensity: 100,
         tooltips: false,
+        isRequired: true,
       },
       {
         type: 'radiogroup',
         name: 'length' + (number + 1),
         title: 'La durata della partita è stata:',
         choices: [
-          'Corta',
-          'Giusta',
-          'Lunga',
+          { value: 'short', text:{ it:'Corta' } },
+          { value: 'fine', text:{ it:'Giusta' } },
+          { value: 'long', text:{ it:'Lunga' } },
         ],
+        isRequired: true,
       },
     ],
     title: `Partita ${number + 1}`,
@@ -122,10 +129,11 @@ for (const key in difficulties) {
       name: 'bot' + (number + 1) + 'GiveUp',
       title: 'Perchè ti sei arreso?',
       choices: [
-        'Troppo difficile',
-        'Troppo lunga',
-        'Troppo noiosa',
+        { value: 'hard', text:{ it:'Troppo difficile' } },
+        { value: 'long', text:{ it:'Troppo lunga' } },
+        { value: 'boring', text:{ it:'Troppo noiosa' } },
       ],
+      isRequired: true,
     });
   }
   pages.push(page);
@@ -148,12 +156,14 @@ const lastPage = {
       name: 'sortDifficulty',
       title: 'Ordina le partite per difficoltà (più difficile prima)',
       choices: choices,
+      isRequired: true,
     },
     {
       type: 'ranking',
       name: 'sortFun',
       title: 'Ordina le partite per divertimento (più divertente prima)',
       choicesFromQuestion: 'sortDifficulty',
+      isRequired: true,
     },
     {
       type: 'nouislider',
@@ -166,16 +176,18 @@ const lastPage = {
       pipsText: [{ value:0, text:'Poco' }, { value:50, text:'Nella media' }, { value:100, text:'Tanto' }],
       pipsDensity: 100,
       tooltips: false,
+      isRequired: true,
     },
     {
       type: 'radiogroup',
       name: 'lengthTotal',
       title: 'La durata del sondaggio è:',
       choices: [
-        'Corta',
-        'Giusta',
-        'Lunga',
+        { value: 'short', text:{ it:'Corta' } },
+        { value: 'fine', text:{ it:'Giusta' } },
+        { value: 'long', text:{ it:'Lunga' } },
       ],
+      isRequired: true,
     },
   ],
   title: 'Postpartita',

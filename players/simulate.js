@@ -97,12 +97,12 @@ const cm4 = confusionMatrix(modulesAlphaNoRandom, simSeed, 100);
 printConfusionMatrix(cm4, names4, 3); */
 
 const modulesTime = [
-  new ABMMT(simSeed, 1, Evaluate.setK(0.4), true, 1),
-  new ABMMT2(simSeed, 1, Evaluate.setK(0.4), true, 1),
-  new ABMMT3(simSeed, 5, Evaluate.setK(0.4), true, 1),
+  new ABMMT(simSeed, 1, Evaluate.setK(0.4), true, 3),
+  new ABMMT2(simSeed, 1, Evaluate.setK(0.4), true, 3),
+  new ABMMT3(simSeed, 1, Evaluate.setK(0.4), true, 3),
 ];
 const namesTime = ['ABMMT', 'ABMMT2', 'ABMMT3'];
-const cm4 = confusionMatrix(modulesTime, simSeed, 10);
+const cm4 = confusionMatrix(modulesTime, simSeed, 100);
 printConfusionMatrix(cm4, namesTime, 3);
 
 
