@@ -159,7 +159,7 @@ class UnoSP {
     // Return card to the deck, shuffle, flip top card to start discard pile
     let firstDiscard = this.deck.shift();
     while (firstDiscard.type === 'WildDraw') {
-      console.log('first card is WildDraw, reshuffling');
+      console.log('UnoSP: first card is WildDraw, reshuffling');
       this.deck.unshift(firstDiscard);
       this.currentRNG = this.rng();
       this.deck = Deck.shuffleCardsSeeded([...this.deck], this.currentRNG);
@@ -279,7 +279,7 @@ class UnoSP {
       }
     }
     else {
-      console.log('CARD NOT FOUND WHILE DISCARDING');
+      console.log('UnoSP: CARD NOT FOUND WHILE DISCARDING');
     }
     /* console.log(this.bots[0].gameState.deck);
     console.log(this.deck); */

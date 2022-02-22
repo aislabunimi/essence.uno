@@ -55,10 +55,10 @@ surveySchema.statics.updateSurvey = function(surveyid, lastupdate, questions, cb
     }
     surveyDb.save((err, res) => {
       if (err) {
-        console.log('surveymodel: error saving survey -> ' + err);
+        console.log('Surveymodel: Error saving survey -> ' + err);
       }
       else {
-        console.log('surveymodel: survey updated');
+        console.log('Surveymodel: Survey updated');
       }
     });
   });
@@ -68,10 +68,10 @@ surveySchema.statics.addGame = function(surveyid, game, cb) {
   // console.log('surveymodel: adding game to survey');
   return this.updateOne({ surveyid }, { $push: { games: game } }, (err, res) => {
     if (err) {
-      console.log('surveymodel: error adding game to survey -> ' + err);
+      console.log('Surveymodel: Error adding game to survey -> ' + err);
     }
     else {
-      console.log('surveymodel: added game to survey');
+      console.log('Surveymodel: Game added to survey');
     }
   });
 };

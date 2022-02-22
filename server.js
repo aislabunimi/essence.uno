@@ -34,7 +34,7 @@ io.on('connection', (socket) => {
     // check if rooms contains a room with name name
     if (rooms.find((room) => room.uuid === roomName)) {
       // if room already exists, don't create a new room
-      console.log('room already exists');
+      console.log(roomName, ': room already exists');
       return;
     }
     // create a new room and add it to rooms array
@@ -98,10 +98,10 @@ io.on('connection', (socket) => {
   });
 
   socket.on('join_room', (roomUUID, name, surname, uuid, bot) => {
-    console.log(`${roomUUID}: joined by ${name} ${surname} (${uuid})`);
     // find room the user want to join
     const room = rooms.find((r) => r.uuid === roomUUID);
     if (room) {
+      console.log(`Room ${room.name}: joined by ${name} ${surname} (${uuid})`);
       // user join room
       socket.join(roomUUID);
       // saving room name
@@ -145,7 +145,7 @@ io.on('connection', (socket) => {
       }
     }
     else {
-      console.log(roomUUID, 'does not exist');
+      console.log(roomUUID, ': does not exist');
       socket.emit('room_not_found');
     }
   });
@@ -240,11 +240,11 @@ io.on('connection', (socket) => {
     }
     const old_data = await surveyMongoose.findById(results.id);
     if (old_data) {
-      console.log('found old data for this survey, updating it');
+      console.log('Server: Found old data for this survey, updating it');
       surveyMongoose.updateSurvey(results.id, new Date(), surveyAnswers);
     }
     else {
-      console.log('old data not found, inserting new survey');
+      console.log('Server: Old data not found, inserting new survey');
       surveyMongoose.insertNewSurvey(results.id, [], new Date(), new Date(), surveyAnswers);
     }
   });
@@ -271,7 +271,7 @@ io.on('connection', (socket) => {
         room.endTime = Date.now();
         // if we are in a survey, adding game to survey
         if (room.type.includes('survey')) {
-          console.log('adding game to survey');
+          console.log('Server: adding game to survey');
           // retrieving real player uuid
           const realPlayerUUID = room.game.players.find((p) => p.isBot === false).uuid;
           const game = gameMongoose.createNewgame(
@@ -286,7 +286,7 @@ io.on('connection', (socket) => {
           surveyMongoose.addGame(realPlayerUUID, game);
         }
 
-        console.log('Saving game data on db');
+        console.log('Server: Saving game data on db');
         gameMongoose.insertNewGame(
           room.uuid,
           room.playersUUIDs,
@@ -295,7 +295,7 @@ io.on('connection', (socket) => {
           room.endTime,
           room.rounds,
         );
-        console.log(room.uuid, ': deleted');
+        console.log('Room', room.name, ': deleted');
         rooms.splice(rooms.indexOf(room), 1);
       }
       else {

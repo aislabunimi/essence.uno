@@ -123,7 +123,7 @@ class Uno {
     // Return card to the deck, shuffle, flip top card to start discard pile
     let firstDiscard = this.deck.shift();
     while (firstDiscard.type === 'WildDraw') {
-      console.log('first card is WildDraw, reshuffling');
+      console.log('Uno: first card is WildDraw, reshuffling');
       this.deck.unshift(firstDiscard);
       this.currentRNG = this.rng();
       this.deck = Deck.shuffleCardsSeeded([...this.deck], this.currentRNG);
@@ -242,7 +242,7 @@ class Uno {
       }
     }
     else {
-      console.log('card not found while discarding');
+      console.log('Uno: card not found while discarding');
     }
     this.nextTurn();
   }

@@ -7,7 +7,7 @@ const socket = io();
 
 // if the user doesn't have a name, surname and a room name, can't create a room
 function createRoom(e) {
-  console.log('creating room...');
+  console.log('Index: creating room...');
   e.preventDefault();
   if (document.getElementById('name').checkValidity() &&
     document.getElementById('surname').checkValidity() &&
@@ -62,7 +62,7 @@ socket.on('room_created', (uuid) => {
 window.onload = () => {
   // Making my life easier while debugging
   updateNPlayersSelect();
-  console.log('loading data from cookies');
+  console.log('Index: Loading data from cookies');
   if (getCookie('roomName') != '') {
     roomNameInput.value = getCookie('roomName');
   }

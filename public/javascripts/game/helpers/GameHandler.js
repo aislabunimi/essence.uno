@@ -150,7 +150,7 @@ export default class GameHandler {
       }
       else {
         scene.UIHandler.showButton(scene.strings.contestUno, () => {
-          console.log('contest uno');
+          // console.log('contest uno');
           scene.SocketHandler.contestUno();
         });
       }
@@ -164,11 +164,11 @@ export default class GameHandler {
       scene.UIHandler.buildAlertBox(
         scene.strings.contest4,
         () => {
-          console.log('contest 4: true');
+          // console.log('contest 4: true');
           scene.SocketHandler.contest4(true);
         },
         () => {
-          console.log('contest 4: false');
+          // console.log('contest 4: false');
           scene.SocketHandler.contest4(false);
         },
         10000,

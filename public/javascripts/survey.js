@@ -201,7 +201,7 @@ function initializeSurvey() {
     $('#survey-complete').show();
     return;
   }
-  console.log('initializing survey');
+  console.log('Survey: Initializing survey');
   if (window.localStorage.getItem('gameNumber') === null) {
     window.localStorage.setItem('gameNumber', 0);
   }
@@ -222,10 +222,10 @@ function initializeSurvey() {
   // const surveyJSONs = { 'pages':[{ 'name': 'before_playing', 'elements':[{ 'type':'text', 'name':'name', 'title':'What\'s your name?', 'isRequired':!0, 'placeHolder':'It doesn\'t need to be the real one' }, { 'type':'text', 'name':'surname', 'title':'What\'s your surname?', 'isRequired':!0, 'placeHolder':'It doesn\'t need to be the real one' }, { 'type':'rating', 'name':'ownStrength', 'title':'How strong do you think you are at UNO?', 'isRequired':!0, 'rateMax':10 }], 'title': 'Before playing' }], 'completeText':'Done' };
 
   const survey = new Survey.Model(pickSurvey());
-  console.log('checking if old survey data exists');
+  console.log('Survey: Checking if old survey data exists');
   const prevData = window.localStorage.getItem('survey') || null;
   if (prevData) {
-    console.log('old survey data found');
+    console.log('Survey: Old survey data found');
     const data = JSON.parse(prevData);
     survey.data = data;
     if (data.pageNo != null) {
@@ -249,15 +249,15 @@ function initializeSurvey() {
     data.pageNo = s.currentPageNo;
     data.difficulties = difficulties;
     socket.emit('survey_results', dataToSend);
-    console.log('The final results are:' + JSON.stringify(dataToSend));
+    console.log('Survey: The final results are:' + JSON.stringify(dataToSend));
     // TODO: save data somewhere
     // go to game if not done
     if (window.localStorage.getItem('gameNumber') < difficulties.length) {
-      console.log('moving to game');
+      console.log('Survey: Moving to game');
       createRoom(data.name, data.surname);
     }
     else {
-      console.log('done');
+      console.log('Survey: Done with games and survey');
       window.localStorage.setItem('done', true);
       $('#survey').remove();
       $('#survey-complete').show();
@@ -265,7 +265,7 @@ function initializeSurvey() {
   }
   function savingPartialData(s) {
     // saving on local storage
-    console.log(s.getPlainData());
+    // console.log(s.getPlainData());
     const data = s.data;
     data.pageNo = s.currentPageNo;
     window.localStorage.setItem('survey', JSON.stringify(data));
@@ -311,7 +311,7 @@ function pickSurvey() {
 }
 
 function clearSurvey() {
-  console.log('clearing survey');
+  console.log('Survey: clearing survey');
   // make cookie expire
   document.cookie = 'uuid=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
   window.localStorage.removeItem('survey');
@@ -328,7 +328,7 @@ function pickDifficulty() {
 
 // if the user doesn't have a name, surname and a room name, can't create a room
 function createRoom(name, surname) {
-  console.log('creating room...');
+  console.log('Survey: Creating room...');
   // saving name & surname
   document.cookie = `name=${name}; SameSite=Strict`;
   document.cookie = 'surname=; SameSite=Strict';
@@ -349,11 +349,11 @@ socket.on('room_created', (uuid) => {
 window.onload = () => {
   const prevData = window.localStorage.getItem('survey') || null;
   if (prevData) {
-    console.log('old survey data found, hiding disclaimer and rules');
+    console.log('Survey: Old survey data found, hiding disclaimer and rules');
     $('#survey-information').hide();
   }
   else {
-    console.log('no old survey data found, showing disclaimer and rules');
+    console.log('Survey: No old survey data found, showing disclaimer and rules');
     $('#survey-information').show();
   }
   /* console.log('loading data from cookies');

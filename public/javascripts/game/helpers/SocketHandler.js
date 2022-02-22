@@ -5,7 +5,7 @@ export default class SocketHandler {
 
     // joining room
     console.log(
-      `joining room ${scene.roomUUID}, with name ${scene.user.name} ${scene.user.surname}`,
+      `SocketHandler: joining room ${scene.roomUUID}, with name ${scene.user.name} ${scene.user.surname}`,
     );
     this.socket.emit('join_room', scene.roomUUID, scene.user.name, scene.user.surname, scene.user.uuid);
     this.socket.on('room_not_found', () => {

@@ -13,63 +13,63 @@ const Evaluate = require('./gamestate/evaluate');
 function create(roomUUID, difficulty, seed, deck) {
   switch (difficulty) {
   case 'Random':
-    console.log('creating random player');
+    console.log('Player: Creating random player');
     return new Player(roomUUID, difficulty, seed, deck, new Random(seed));
   case 'RandomPlay':
-    console.log('creating randomPlay player');
+    console.log('Player: Creating randomPlay player');
     return new Player(
       roomUUID, difficulty, seed, deck, new RandomPlay(seed),
     );
   case 'Greedy':
-    console.log('creating greedy player');
+    console.log('Player: Creating greedy player');
     return new Player(roomUUID, difficulty, seed, deck, new Greedy(seed));
   case 'GreedyMiniMax':
-    console.log('creating greedyMiniMax player');
+    console.log('Player: Creating greedyMiniMax player');
     return new Player(
       roomUUID, difficulty, seed, deck, new GreedyMiniMax(seed, 5),
     );
   case 'GreedyMiniMax2':
-    console.log('creating greedyMiniMax2 player');
+    console.log('Player: Creating greedyMiniMax2 player');
     return new Player(
       roomUUID, difficulty, seed, deck, new GreedyMiniMax2(seed, 5),
     );
   case 'GreedyMiniMax2A1': {
-    console.log('creating greedyMiniMax2A1 player');
+    console.log('Player: Creating greedyMiniMax2A1 player');
     const algo = new GreedyMiniMax2(seed, 5, Evaluate.setAlpha(1));
     return new Player(
       roomUUID, difficulty, seed, deck, algo,
     );
   }
   case 'GreedyMiniMax2A075': {
-    console.log('creating greedyMiniMax2A075 player');
+    console.log('Player: Creating greedyMiniMax2A075 player');
     const algo = new GreedyMiniMax2(seed, 5, Evaluate.setAlpha(0.75));
     return new Player(
       roomUUID, difficulty, seed, deck, algo,
     );
   }
   case 'ABMMK04' : {
-    console.log('creating ABMM player');
+    console.log('Player: Creating ABMM player');
     const algo = new ABMM(seed, 5, Evaluate.setK(0.4));
     return new Player(
       roomUUID, difficulty, seed, deck, algo,
     );
   }
   case 'ABMMTK04' : {
-    console.log('creating ABMMTK04 player');
+    console.log('Player: Creating ABMMTK04 player');
     const algo = new ABMMT(seed, 0, Evaluate.setK(0.4), true, 100);
     return new Player(
       roomUUID, difficulty, seed, deck, algo,
     );
   }
   case 'ABMMT2K04' : {
-    console.log('creating ABMMT2K04 player');
+    console.log('Player: Creating ABMMT2K04 player');
     const algo = new ABMMT2(seed, 0, Evaluate.setK(0.4), true, 100);
     return new Player(
       roomUUID, difficulty, seed, deck, algo,
     );
   }
   case 'ABMMT3K04' : {
-    console.log('creating ABMMT3K04 player');
+    console.log('Player: Creating ABMMT3K04 player');
     const algo = new ABMMT3(seed, 0, Evaluate.setK(0.4), true, 100);
     return new Player(
       roomUUID, difficulty, seed, deck, algo,
@@ -114,11 +114,11 @@ class Player {
     this.socket.on('discard', (card) => {
       if (this.currentTurn !== this.myTurn) {
         if (this.drew) {
-          console.log('Player chose move: Draw_Play - ' + card.name);
+          // console.log('Player chose move: Draw_Play - ' + card.name);
           this.gameState = this.gameState.nextState({ type:'Draw_Play', card:card });
         }
         else {
-          console.log('Player chose move: Play - ' + card.name);
+          // console.log('Player chose move: Play - ' + card.name);
           this.gameState = this.gameState.nextState({ type:'Play', card:card });
         }
         this.drew = false;
@@ -126,7 +126,7 @@ class Player {
     });
 
     this.socket.on('win', () => {
-      console.log('someone won the game');
+      // console.log('Player: Someone won the game');
       this.end = true;
     });
 
@@ -140,7 +140,7 @@ class Player {
       if (this.currentTurn === this.myTurn) {
         // update gameState, previous player passed
         if (this.drew) {
-          console.log('Player chose move: Draw_Pass');
+          // console.log('Player chose move: Draw_Pass');
           this.gameState = this.gameState.nextState({ type:'Draw_Pass' });
           this.drew = false;
         }
@@ -154,12 +154,12 @@ class Player {
         else {
           move = result;
         }
-        if (move.card) {
+        /* if (move.card) {
           console.log('Bot chose move: ' + move.type + ' - ' + move.card.name);
         }
         else {
           console.log('Bot chose move: ' + move.type);
-        }
+        } */
 
         this.gameState = this.gameState.nextState(move);
 
@@ -199,7 +199,7 @@ class Player {
       this.socket.emit('discard', move.card);
       break;
     default:
-      console.log('Unknown move type: ' + move.type);
+      console.log('Player: Unknown move type: ' + move.type);
     }
   }
 
@@ -211,9 +211,9 @@ class Player {
   leave() {
     // called by the object owner when the other player leaves
     // starts a 30 seconds timer and then disconnect, allowing the room to be deleted
-    console.log('Bot: leaving in 30 seconds...');
+    console.log('Player: Leaving in 30 seconds...');
     this.disconnectTimeout = setTimeout(() => {
-      console.log('Bot: leaving');
+      console.log('Player: Leaving now');
       this.socket.disconnect();
     }, 30_000);
   }
@@ -221,12 +221,12 @@ class Player {
   leaveNow() {
     // called by the object owner when the other player leaves
     // disconnect immediately
-    console.log('Bot: leaving');
+    console.log('Player: Leaving now');
     this.socket.disconnect();
   }
 
   cancelLeave() {
-    console.log('Bot: leaving canceled');
+    console.log('Player: leaving canceled');
     clearTimeout(this.disconnectTimeout);
   }
 }

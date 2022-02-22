@@ -8,7 +8,7 @@ export default class GameScene extends Phaser.Scene {
   }
 
   preload() {
-    console.log('Loading info from cookies');
+    console.log('Scene: Loading info from cookies');
     this.roomUUID = getCookie('roomUUID');
     this.user = {
       uuid: getCookie('uuid').slice(2),
@@ -16,7 +16,7 @@ export default class GameScene extends Phaser.Scene {
       surname: getCookie('surname'),
     };
 
-    console.log('Loading game assets');
+    console.log('Scene: Loading game assets');
     // load uno cards
     const colors = ['Red', 'Green', 'Blue', 'Yellow'];
     const values = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'Skip', 'Reverse', 'Draw', 'Wild', 'WildDraw'];
@@ -82,18 +82,18 @@ export default class GameScene extends Phaser.Scene {
       this.colorScheme = 'light';
     }
 
-    console.log('Creating game scene');
-    console.log('Creating UIHandler');
+    console.log('Scene: Creating game scene');
+    console.log('Scene: Creating UIHandler');
     this.UIHandler = new UIHandler(this);
-    console.log('Creating GameHandler');
+    console.log('Scene: Creating GameHandler');
     this.GameHandler = new GameHandler(this);
-    console.log('Building UI');
+    console.log('Scene: Building UI');
     this.UIHandler.buildUI();
-    console.log('Creating SocketHandler');
+    console.log('Scene: Creating SocketHandler');
     this.SocketHandler = new SocketHandler(this);
     // console.log('Creating interactivity handler');
     // this.InteractivityHandler = new InteractivityHandler(this);
-    console.log('Game scene created');
+    console.log('Scene: Game scene created');
   }
 
   update() {
