@@ -241,11 +241,13 @@ io.on('connection', (socket) => {
     const old_data = await surveyMongoose.findById(results.id);
     if (old_data) {
       console.log('Server: Found old data for this survey, updating it');
-      surveyMongoose.updateSurvey(results.id, new Date(), surveyAnswers);
+      surveyMongoose.updateSurvey(results.id, new Date(), results.games, surveyAnswers);
     }
     else {
       console.log('Server: Old data not found, inserting new survey');
-      surveyMongoose.insertNewSurvey(results.id, [], new Date(), new Date(), surveyAnswers);
+      surveyMongoose.insertNewSurvey(
+        results.id, [], results.games, new Date(), new Date(), surveyAnswers,
+      );
     }
   });
 

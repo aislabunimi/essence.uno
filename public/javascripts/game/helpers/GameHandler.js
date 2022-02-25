@@ -3,9 +3,15 @@ export default class GameHandler {
     this.myTurn = null;
     this.currentTurn = null;
     this.availableMoves = [];
-    this.turns = 0;
+    this.survey = false;
     this.winner = null;
-    this.survey = true;
+    this.turns = 0;
+    this.myCards = 0;
+    this.opponentCards = 0;
+    this.cardDeltas = [];
+    this.turnTimes = [];
+    this.turnTime = null;
+    this.startTime = null;
 
     this.isMyTurn = () => {
       return this.myTurn === this.currentTurn;
@@ -47,14 +53,14 @@ export default class GameHandler {
           scene.UIHandler.hideButton();
         });
       }
+      this.turnTime = new Date();
+      this.startTime = new Date();
       scene.UIHandler.ready();
     };
 
     this.discardServer = (card) => {
       // if someone else plays a card, clear the UNO button
       this.clearUno();
-      // count turns
-      this.turns += 1;
       // if game is too long, add option to give up
       if (this.survey && this.turns > 25) {
         scene.UIHandler.showExtraButton(scene.strings.giveUp, () => {
@@ -135,7 +141,6 @@ export default class GameHandler {
       if (this.myTurn === this.currentTurn && this.availableMoves.includes('Draw')) {
         scene.SocketHandler.drawCard();
         scene.UIHandler.showButton(scene.strings.pass, () => {
-          this.turns += 1;
           scene.SocketHandler.pass();
           scene.UIHandler.hideButton();
         });
@@ -184,12 +189,35 @@ export default class GameHandler {
     };
 
     this.updateTurn = (turn) => {
+      this.turns += 1;
+      // update total card difference
+      this.cardDeltas.push(this.myCards - this.opponentCards);
+      // add time difference between turns to turnTimes array
+      const timeDelta = new Date() - this.turnTime;
+      if (this.isMyTurn()) {
+        this.turnTimes.push(timeDelta);
+      }
+      else {
+        this.turnTimes.push(-timeDelta);
+      }
+      this.turnTime = new Date();
+
       this.currentTurn = turn;
       scene.UIHandler.updateTurn(this.isMyTurn());
     };
 
     this.updatePlayersBoard = (board) => {
       scene.UIHandler.updatePlayersBoard(board);
+      if (this.survey) {
+        const playerData = board.find(player => player.name === scene.user.name);
+        if (playerData) {
+          this.myCards = playerData.hand;
+        }
+        const opponentData = board.find(player => player.name !== scene.user.name);
+        if (opponentData) {
+          this.opponentCards = opponentData.hand;
+        }
+      }
     };
 
     this.win = (winner) => {
@@ -256,12 +284,30 @@ export default class GameHandler {
       scene.UIHandler.buildAlertBox(scene.strings.surveyGameDone);
       const gameNumber = window.localStorage.getItem('gameNumber');
       window.localStorage.setItem('gameNumber', parseInt(gameNumber) + 1);
+      // update cardDeltas
+      this.cardDeltas.push(this.myCards - this.opponentCards);
+      // update turnTimes
+      const timeDelta = new Date() - this.turnTime;
+      if (this.isMyTurn()) {
+        this.turnTimes.push(timeDelta);
+      }
+      else {
+        this.turnTimes.push(-timeDelta);
+      }
+      // update turn counter
+      this.turns += 1;
+      // create game and save to localStorage
       const games = window.localStorage.getItem('games');
       const game = {
-        gameNumber: parseInt(gameNumber) + 1,
-        date: new Date(),
+        number: parseInt(gameNumber) + 1,
+        start: this.startTime,
+        end: new Date(),
         winner: this.winner,
-        turns: this.turns,
+        gaveUp: this.winner ? false : true,
+        won: this.winner ? this.winner.trim() === scene.user.name.trim() ? true : false : false,
+        length: this.turns,
+        cardDeltas: this.cardDeltas,
+        timeDeltas: this.turnTimes,
       };
       window.localStorage.setItem('games', JSON.stringify([...JSON.parse(games), game]));
       setTimeout(() => {

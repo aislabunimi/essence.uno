@@ -2,12 +2,14 @@ const config = require('../config/config.js');
 const mongoose = require('mongoose');
 const Game = require('./game').schema;
 const Question = require('./question');
+const SurveyGame = require('./surveyGame').schema;
 
 const conn = mongoose.createConnection(config.MONGOURL);
 
 const survey = {
   surveyid: String,
   games: [Game],
+  surveyGames: [SurveyGame],
   createtime: Date,
   lastupdate: Date,
   questions: [Question],
@@ -20,11 +22,11 @@ surveySchema.statics.findById = async function(surveyid, cb) {
 };
 
 surveySchema.statics.insertNewSurvey =
-  function(surveyid, games, createtime, lastupdate, questions, cb) {
-    return this.create({ surveyid, games, createtime, lastupdate, questions }, cb);
+  function(surveyid, games, surveyGames, createtime, lastupdate, questions, cb) {
+    return this.create({ surveyid, games, surveyGames, createtime, lastupdate, questions }, cb);
   };
 
-surveySchema.statics.updateSurvey = function(surveyid, lastupdate, questions, cb) {
+surveySchema.statics.updateSurvey = function(surveyid, lastupdate, surveyGames, questions, cb) {
   // get the survey
   return this.findOne({ surveyid }, (err, surveyDb) => {
     if (err) {
@@ -32,6 +34,7 @@ surveySchema.statics.updateSurvey = function(surveyid, lastupdate, questions, cb
     }
     // update the survey
     surveyDb.lastupdate = lastupdate;
+    surveyDb.surveyGames = surveyGames;
     // console.log('surveymodel: updating survey');
     // console.log(surveyDb);
     // update each question in the survey

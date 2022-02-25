@@ -123,7 +123,7 @@ for (const key in difficulties) {
   };
   // add give up question if the game was gave up
   const games = JSON.parse(window.localStorage.getItem('games'));
-  if (games && games[number] && games[number].winner === null) {
+  if (games && games[number] && games[number].gaveUp) {
     page.elements.push({
       type: 'radiogroup',
       name: 'bot' + (number + 1) + 'GiveUp',
@@ -248,9 +248,18 @@ function initializeSurvey() {
     data.id = getCookie('uuid').slice(2);
     data.pageNo = s.currentPageNo;
     data.difficulties = difficulties;
+
+    // adding some gameData as seen from frontEnd to dataToSend
+    const games = JSON.parse(window.localStorage.getItem('games'));
+    if (games) {
+      for (let i = 0; i < games.length; i++) {
+        games[i].difficulty = difficulties[i];
+      }
+      dataToSend.games = games;
+    }
+
     socket.emit('survey_results', dataToSend);
-    console.log('Survey: The final results are:' + JSON.stringify(dataToSend));
-    // TODO: save data somewhere
+    // console.log('Survey: The final results are:' + JSON.stringify(dataToSend));
     // go to game if not done
     if (window.localStorage.getItem('gameNumber') < difficulties.length) {
       console.log('Survey: Moving to game');
