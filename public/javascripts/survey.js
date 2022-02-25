@@ -3,7 +3,7 @@ const socket = io();
 
 $('#clearSurveyButton').on('click', clearSurvey);
 
-const difficulties = ['RandomPlay', 'GreedyMiniMax2A075', 'ABMMT2K04', 'ABMMT2K04'];
+const difficulties = ['RandomPlay', 'ABMMT2K0', 'ABMMT2K03', 'ABMMT2K02'];
 
 // https://surveyjs.io/create-survey
 /* const surveys = [

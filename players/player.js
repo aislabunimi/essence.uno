@@ -68,6 +68,27 @@ function create(roomUUID, difficulty, seed, deck) {
       roomUUID, difficulty, seed, deck, algo,
     );
   }
+  case 'ABMMT2K0' : {
+    console.log('Player: Creating ABMMT2K0 player');
+    const algo = new ABMMT2(seed, 0, Evaluate.setK(0), true, 100);
+    return new Player(
+      roomUUID, difficulty, seed, deck, algo,
+    );
+  }
+  case 'ABMMT2K02' : {
+    console.log('Player: Creating ABMMT2K02 player');
+    const algo = new ABMMT2(seed, 0, Evaluate.setK(0.2), true, 100);
+    return new Player(
+      roomUUID, difficulty, seed, deck, algo,
+    );
+  }
+  case 'ABMMT2K03' : {
+    console.log('Player: Creating ABMMT2K03 player');
+    const algo = new ABMMT2(seed, 0, Evaluate.setK(0.3), true, 100);
+    return new Player(
+      roomUUID, difficulty, seed, deck, algo,
+    );
+  }
   case 'ABMMT3K04' : {
     console.log('Player: Creating ABMMT3K04 player');
     const algo = new ABMMT3(seed, 0, Evaluate.setK(0.4), true, 100);
