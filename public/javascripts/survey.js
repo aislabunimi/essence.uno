@@ -3,7 +3,21 @@ const socket = io();
 
 $('#clearSurveyButton').on('click', clearSurvey);
 
-const difficulties = ['RandomPlay', 'ABMMT2K0', 'ABMMT2K03', 'ABMMT2K02'];
+const difficulties = ['RandomPlay', 'ABMMT2K0', 'ABMMT2K03'];
+const gamesD = JSON.parse(window.localStorage.getItem('games'));
+if (gamesD) {
+  // count won games in gamesD
+  const wonGames = gamesD.filter(game => game.won);
+  const wonGamesCount = wonGames.length;
+  if (wonGamesCount >= 2) {
+    // add hard difficulty
+    difficulties.push('ABMMT2K02');
+  }
+  else {
+    // add easy difficulty
+    difficulties.push('ABMMT2K04');
+  }
+}
 
 // https://surveyjs.io/create-survey
 /* const surveys = [
@@ -140,11 +154,16 @@ for (const key in difficulties) {
 }
 // generate last page
 const choices = [];
+const games = JSON.parse(window.localStorage.getItem('games'));
 for (const key in difficulties) {
   const number = parseInt(key, 10);
+  let text = `Partita ${number + 1}`;
+  if (games && games[number]) {
+    text += ` (${games[number].won ? 'vinta' : games[number].gaveUp ? 'arreso' : 'persa'} in ${games[number].length} turni)`;
+  }
   const choice = {
     value: `game${number + 1}`,
-    text: `Partita ${number + 1}`,
+    text: text,
   };
   choices.push(choice);
 }
@@ -250,12 +269,12 @@ function initializeSurvey() {
     data.difficulties = difficulties;
 
     // adding some gameData as seen from frontEnd to dataToSend
-    const games = JSON.parse(window.localStorage.getItem('games'));
-    if (games) {
-      for (let i = 0; i < games.length; i++) {
-        games[i].difficulty = difficulties[i];
+    const gamesData = JSON.parse(window.localStorage.getItem('games'));
+    if (gamesData) {
+      for (let i = 0; i < gamesData.length; i++) {
+        gamesData[i].difficulty = difficulties[i];
       }
-      dataToSend.games = games;
+      dataToSend.gamesData = gamesData;
     }
 
     socket.emit('survey_results', dataToSend);
@@ -305,15 +324,15 @@ function pickSurvey() {
   }
   // update description with games data
   // const survey = surveys[gameNumber];
-  const games = JSON.parse(window.localStorage.getItem('games'));
-  for (const id in games) {
+  const gamesData = JSON.parse(window.localStorage.getItem('games'));
+  for (const id in gamesData) {
     const parsedId = parseInt(id);
-    const game = games[parsedId];
+    const game = gamesData[parsedId];
     if (game.winner) {
-      survey.pages[parsedId + 1].description = `La partita è stata vinta da ${game.winner} in ${game.turns} turni.`;
+      survey.pages[parsedId + 1].description = `La partita è stata vinta da ${game.winner} in ${game.length} turni.`;
     }
     else {
-      survey.pages[parsedId + 1].description = `Ti sei arreso dopo ${game.turns} turni.`;
+      survey.pages[parsedId + 1].description = `Ti sei arreso dopo ${game.length} turni.`;
     }
   }
   return survey;
