@@ -145,8 +145,8 @@ for (const key in difficulties) {
       choices: [
         { value: 'hard', text:{ it:'Troppo difficile' } },
         { value: 'long', text:{ it:'Troppo lunga' } },
-        { value: 'boring', text:{ it:'Troppo noiosa' } },
       ],
+      hasOther: true,
       isRequired: true,
     });
   }

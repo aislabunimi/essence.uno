@@ -235,18 +235,18 @@ io.on('connection', (socket) => {
       surveyAnswers.push({
         id: ans.name,
         question: ans.title,
-        answer: [JSON.stringify(ans.value)],
+        answer: ans.value != 'other' ? [JSON.stringify(ans.value)] : [JSON.stringify(ans.displayValue)],
       });
     }
     const old_data = await surveyMongoose.findById(results.id);
     if (old_data) {
       console.log('Server: Found old data for this survey, updating it');
-      surveyMongoose.updateSurvey(results.id, new Date(), results.games, surveyAnswers);
+      surveyMongoose.updateSurvey(results.id, new Date(), results.gamesData, surveyAnswers);
     }
     else {
       console.log('Server: Old data not found, inserting new survey');
       surveyMongoose.insertNewSurvey(
-        results.id, [], results.games, new Date(), new Date(), surveyAnswers,
+        results.id, [], results.gamesData, new Date(), new Date(), surveyAnswers,
       );
     }
   });
