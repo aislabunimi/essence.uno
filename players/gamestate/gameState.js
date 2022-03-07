@@ -114,7 +114,9 @@ class GameState {
     }
 
     // Draw_Pass
-    actions.push({ type: 'Draw_Pass' });
+    if (this.deck.length > 0 || this.discarded.length > 1) {
+      actions.push({ type: 'Draw_Pass' });
+    }
 
     // plays.push(...hand.filter(card => this.cardIsPlayable(card, discard)));
     // actions.push(...plays.map(card => ({ type: 'Play', card })));
