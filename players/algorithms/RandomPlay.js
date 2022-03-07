@@ -18,7 +18,8 @@ class RandomPlay {
     else {
       const drawPlayActions = availableActions.filter(move => move.type === 'Draw_Play');
       if (drawPlayActions.length > 0) {
-        return drawPlayActions[0];
+        const randomIndex2 = Math.floor(this.rng() * drawPlayActions.length);
+        return drawPlayActions[randomIndex2];
       }
       else {
         return availableActions[0];
