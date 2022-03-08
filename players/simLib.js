@@ -84,16 +84,20 @@ function simGame(P1, P2, seed) {
   let draw = false;
   let c1 = 0;
   let c2 = 0;
-  let turnsTimes = [];
+  const depths = [];
+  const turnsTimes = [];
   while (!gamestate.isFinal()) {
     let action = null;
     let c = null;
-    let turnStart = process.hrtime.bigint();
+    const turnStart = process.hrtime.bigint();
     if (gamestate.turn == 0) {
       const result = P1.chooseAction(gamestate);
       if (Array.isArray(result)) {
         [action, c] = result;
         c1 += c;
+        if (result[2]) {
+          depths.push(result[2]);
+        }
       }
       else {
         action = result;
@@ -105,6 +109,9 @@ function simGame(P1, P2, seed) {
       if (Array.isArray(result)) {
         [action, c] = result;
         c2 += c;
+        if (result[2]) {
+          depths.push(result[2]);
+        }
       }
       else {
         action = result;
@@ -149,6 +156,7 @@ function simGame(P1, P2, seed) {
     length: turn,
     counterP1: c1,
     counterP2: c2,
+    depths: depths,
     draw: draw,
     turnsTimes: turnsTimes,
   };
@@ -162,7 +170,8 @@ function runSimulation(P1, P2, seed, numGames, printResults = false) {
   let counterP1 = 0;
   let counterP2 = 0;
   const turns = [];
-  const turnTimes = [];
+  let turnTimes = [];
+  let depths = [];
   for (let i = 0; i < numGames; i++) {
     const result = simGame(P1, P2, rng());
     if (result.gamestate.winner() === 0) {
@@ -175,7 +184,8 @@ function runSimulation(P1, P2, seed, numGames, printResults = false) {
     counterP1 += result.counterP1;
     counterP2 += result.counterP2;
     turns.push(result.length);
-    turnTimes.push(result.turnsTimes);
+    turnTimes = turnTimes.concat(result.turnsTimes);
+    depths = depths.concat(result.depths);
     if (printResults) {
       let message = '';
       if (result.draw) {
@@ -205,6 +215,7 @@ function runSimulation(P1, P2, seed, numGames, printResults = false) {
     counterP2: counterP2,
     turns: turns,
     turnTimes: turnTimes,
+    depths: depths,
   });
 }
 

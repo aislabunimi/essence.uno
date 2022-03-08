@@ -65,7 +65,7 @@ class ABMMT {
     console.log(deltams); */
     // console.log(this.depth);
     this.calls += 1;
-    this.depthSum += this.depth;
+    this.lastDepth = this.depth;
     this.depth = defaultDepth;
 
     const chosen = this.chooseRandomly(rewardMovesList);
@@ -73,7 +73,7 @@ class ABMMT {
     // console.log(gameState.hands[myTurn]);
     // console.log(rewardMovesList);
     // console.log(chosen);
-    return [chosen.moves[0], this.counter];
+    return [chosen.moves[0], this.counter, this.lastDepth];
   }
 
   chooseActionReward(

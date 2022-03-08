@@ -74,11 +74,11 @@ class ABMMT3 {
     } while (done);
     /* console.log(this.depth);
     console.log(deltams); */
-    const delta = process.hrtime(this.time);
-    const deltams = delta[0] * 1000 + delta[1] / 1000000;
+    // const delta = process.hrtime(this.time);
+    // const deltams = delta[0] * 1000 + delta[1] / 1000000;
     // console.log(`${this.depth} - ${deltams}`);
     this.calls += 1;
-    this.depthSum += this.depth;
+    this.lastDepth = this.depth;
     this.depth = defaultDepth;
 
     const chosen = this.chooseRandomly(lastRewardMovesList);
@@ -86,7 +86,7 @@ class ABMMT3 {
     // console.log(gameState.hands[myTurn]);
     // console.log(rewardMovesList);
     // console.log(chosen);
-    return [chosen.moves[0], this.counter];
+    return [chosen.moves[0], this.counter, this.lastDepth];
   }
 
   chooseActionReward(
