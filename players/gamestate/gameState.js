@@ -194,7 +194,12 @@ class GameState {
 
   // checks if a card is playable given the card and the discarded card
   cardIsPlayable(card, lastCard) {
+    // if the last card is a wild card without color, then the card is playable
+    if (lastCard.type === 'Wild' && lastCard.color === 'Blank') {
+      return true;
+    }
     if (!card || !lastCard) return false;
+    // if the card is a wild card, it can be played on any card
     if (card.type === lastCard.type ||
       card.color === lastCard.color) {
       // if the card is of the correct color or type, it can be played
