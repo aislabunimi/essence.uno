@@ -44,7 +44,7 @@ function create(roomUUID, difficulty, seed, deck) {
     console.log('Player: Creating greedyMiniMax2A075 player');
     const algo = new GreedyMiniMax2(seed, 5, Evaluate.setAlpha(0.75));
     return new Player(
-      roomUUID, difficulty, seed, deck, algo,
+      roomUUID, 'MM', seed, deck, algo,
     );
   }
   case 'ABMMK04' : {

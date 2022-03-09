@@ -3,12 +3,21 @@ const socket = io();
 
 $('#clearSurveyButton').on('click', clearSurvey);
 
-const difficulties = ['RandomPlay', 'ABMMT2K0', 'ABMMT2K03'];
+const difficulties = ['RandomPlay', 'GreedyMiniMax2A075', 'ABMMT2K03'];
 const gamesD = JSON.parse(window.localStorage.getItem('games'));
 if (gamesD) {
   // count won games in gamesD
   const wonGames = gamesD.filter(game => game.won);
-  const wonGamesCount = wonGames.length;
+  let wonGamesCount = wonGames.length;
+  if (gamesD.length == difficulties.length + 1) {
+    console.log('Survey: All games are done');
+    console.log(gamesD);
+    if (gamesD[gamesD.length - 1].won) {
+      console.log('Survey: Player won last game, removing from count');
+      wonGamesCount -= 1;
+    }
+  }
+
   if (wonGamesCount >= 2) {
     // add hard difficulty
     difficulties.push('ABMMT2K02');
@@ -17,6 +26,10 @@ if (gamesD) {
     // add easy difficulty
     difficulties.push('ABMMT2K04');
   }
+}
+else {
+  // add easy difficulty
+  difficulties.push('ABMMT2K04');
 }
 
 // https://surveyjs.io/create-survey
@@ -374,7 +387,7 @@ socket.on('room_created', (uuid) => {
   $('#form').submit();
 });
 
-window.onload = () => {
+document.addEventListener('DOMContentLoaded', () => {
   const prevData = window.localStorage.getItem('survey') || null;
   if (prevData) {
     console.log('Survey: Old survey data found, hiding disclaimer and rules');
@@ -394,7 +407,7 @@ window.onload = () => {
   if (getCookie('surname') != '') {
     document.getElementById('surname').value = getCookie('surname');
   } */
-};
+});
 
 function getCookie(cname) {
   const name = cname + '=';
