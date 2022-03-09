@@ -26,12 +26,12 @@ function confusionMatrix(algorithms, seed, runs = 100) {
 function printConfusionMatrix(matrix3, n, precision = 3) {
   const winsPercMatrix = matrix3.map(row => row.map(cell => cell.winsPerc));
   const turnsAvgMatrix = matrix3.map(row => row.map(cell => cell.turnsAvg));
-  const repeatsMatrix = matrix3.map(row => row.map(cell => cell.repeats));
+  const drawsMatrix = matrix3.map(row => row.map(cell => cell.draws));
 
   const matrixesWithNames = [
     { matrix:winsPercMatrix, name: 'winsPerc' },
     { matrix:turnsAvgMatrix, name: 'turnsAvg' },
-    { matrix:repeatsMatrix, name: 'repeats ' },
+    { matrix:drawsMatrix, name: 'draws' },
   ];
   const max_length = Math.max(
     ...matrixesWithNames.map(m => findLongestName(m.matrix, n, precision)),
