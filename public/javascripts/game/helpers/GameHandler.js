@@ -12,6 +12,7 @@ export default class GameHandler {
     this.turnTimes = [];
     this.turnTime = null;
     this.startTime = null;
+    this.contestUnoTimer = null;
 
     this.isMyTurn = () => {
       return this.myTurn === this.currentTurn;
@@ -154,14 +155,22 @@ export default class GameHandler {
         });
       }
       else {
-        scene.UIHandler.showButton(scene.strings.contestUno, () => {
-          // console.log('contest uno');
-          scene.SocketHandler.contestUno();
-        });
+        // after 2 seconds show the option to contestUno 
+        this.contestUnoTimer = setTimeout(() => {
+          scene.UIHandler.showButton(scene.strings.contestUno, () => {
+            // console.log('contest uno');
+
+            scene.SocketHandler.contestUno();
+          });
+        }, 2000);
       }
     };
 
     this.clearUno = () => {
+      if (this.contestUnoTimer) {
+        clearTimeout(this.contestUnoTimer);
+        this.contestUnoTimer = null;
+      }
       scene.UIHandler.hideButton();
     };
 
