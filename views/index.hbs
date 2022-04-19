@@ -2,16 +2,36 @@
   <div class="centered">
     <h1>Uno</h1>
     <h2>Create a new room</h2>
-    <form method="post" id="form" action="/game" onsubmit="createRoom()">
+    <form method="post" id="form" action="/game">
       <h3>Choose a Name</h3>
       <input type="text" name="name" id="name" placeholder="Name" autocomplete="off" required />
-      <h3>Choose a Surname</h3>
-      <input type="text" name="surname" id="surname" placeholder="Surname" autocomplete="off" required />
-      <br />
       <h3>Choose a Room Name, if you want to create a new one</h3>
       <input type="text" name="roomName" id="roomName" minlength="3" required autocomplete="off"
         placeholder="Room Name" />
-      <h3>Choose the number of players</h3>
+      <h3>Choose the room type</h3>
+      <select name="roomType" id="roomType" onchange="updateNPlayersSelect()">
+        <option value="singleplayer">Singleplayer</option>
+        <option value="multiplayer">Multiplayer</option>
+        <option value="multiplayer_jitsi">Multiplayer(Jitsi)</option>
+      </select>
+      <h3 id="difficultyH3">Choose the difficulty</h3>
+      <select name="difficulty" id="difficulty" required>
+        <option value="Random">Random</option>
+        <option value="RandomPlay">RandomPlay</option>
+        <option value="Greedy">Greedy</option>
+        <option value="GreedyMiniMax">GreedyMiniMax</option>
+        <option value="GreedyMiniMax2">GreedyMiniMax2</option>
+        <option value="GreedyMiniMax2A1">GreedyMiniMax2A1</option>
+        <option value="GreedyMiniMax2A075">GreedyMiniMax2A075</option>
+        <option value="ABMMK04">ABMMK04</option>
+        <option value="ABMMTK04">ABMMTK04</option>
+        <option value="ABMMT2K0">ABMMT2K0</option>
+        <option value="ABMMT2K02">ABMMT2K02</option>
+        <option value="ABMMT2K03">ABMMT2K03</option>
+        <option value="ABMMT2K04">ABMMT2K04</option>
+        <option value="ABMMT3K04">ABMMT3K04</option>
+      </select>
+      <h3 id="nPlayersH3">Choose the number of players</h3>
       <select name="players" id="nPlayers" required>
         <option value="2">2</option>
         <option value="3">3</option>
@@ -23,7 +43,7 @@
         <option value="9">9</option>
         <option value="10">10</option>
       </select>
-      <button id="createRoomButton">
+      <button id="createRoomButton" type="submit">
         Create room
       </button>
       <input type="text" name="roomUUID" id="roomUUID" hidden />
@@ -33,6 +53,7 @@
       <tr>
         <th>Room name</th>
         <th>Players</th>
+        <th>Type</th>
         <th></th>
       </tr>
       <tbody id="rows">
@@ -40,7 +61,8 @@
         <tr>
           <td>{{this.name}}</td>
           <td>{{this.players}}/{{this.maxPlayers}}</td>
-          <td><button onclick="joinRoom('{{this.uuid}}')">Join</button></td>
+          <td>{{this.type}}</td>
+          <td><button onclick="joinRoom('{{this.uuid}}','{{this.type}}')">Join</button></td>
         </tr>
         {{/each}}
       </tbody>

@@ -1,10 +1,12 @@
 const seedrandom = require('seedrandom');
 const { v4: uuidv4 } = require('uuid');
-const Deck = require('./utils/Deck');
 
-class Uno {
-  constructor(roomUUID, maxPlayers, setupPlayerCallback, drawCallback, unoCallback,
-    wild4ContestCallback, winCallback) {
+const Deck = require('./utils/Deck');
+const CPUPlayer = require('./players/player');
+
+class UnoSP {
+  constructor(roomUUID, maxPlayers, setupPlayerCallback,
+    drawCallback, winCallback, difficulty, isSurvey) {
     this.roomUUID = roomUUID;
     this.seed = uuidv4();
     this.rng = seedrandom(this.seed);
@@ -19,14 +21,21 @@ class Uno {
     this.lastPlayer = null;
     this.setupPlayerCallback = setupPlayerCallback;
     this.drawCallback = drawCallback;
-    this.unoCallback = unoCallback;
-    this.wild4ContestCallback = wild4ContestCallback;
     this.winCallback = winCallback;
     this.startTime = null;
     this.endTime = null;
     this.winner = null;
     this.actions = [];
     this.feedback = [];
+    this.survey = isSurvey;
+    this.bots = [
+      CPUPlayer.create(
+        roomUUID,
+        difficulty,
+        this.seed,
+        Deck.shuffleCardsSeeded(Deck.createDeck(), this.currentRNG),
+      ),
+    ];
   }
 
   reset() {
@@ -46,10 +55,14 @@ class Uno {
     for (const player of this.players) {
       player.hand = [];
     }
+    for (const bot of this.bots) {
+      bot.reset(this.seed,
+        Deck.shuffleCardsSeeded(Deck.createDeck(), this.currentRNG));
+    }
   }
 
   // adds a new player to the game and initializes it
-  addPlayer(socketId, name, surname, uuid) {
+  addPlayer(socketId, name, surname, uuid, isBot) {
     this.players.push({
       socketId: socketId,
       uuid: uuid,
@@ -60,6 +73,7 @@ class Uno {
       hand: [],
       hasDrawn: false,
       wins: 0,
+      isBot: isBot === true ? true : false,
     });
   }
   // get a player from their uuid
@@ -83,8 +97,13 @@ class Uno {
   // sets the connected flag of the player with matching socketId to false
   disconnectPlayer(socketId) {
     const player = this.getPlayerSocketId(socketId);
-    if (player) {
+    const bot = this.bots.find(b => b.uuid === player.uuid);
+    if (player && !bot) {
       player.connected = false;
+      // tell the bots to leave
+      for (const b of this.bots) {
+        b.leave();
+      }
     }
   }
 
@@ -93,6 +112,10 @@ class Uno {
     const player = this.players.find(p => p.uuid === uuid);
     player.socketId = socketId;
     player.connected = true;
+    // stop the bots from leaving
+    for (const bot of this.bots) {
+      bot.cancelLeave();
+    }
     return player;
   }
 
@@ -112,6 +135,19 @@ class Uno {
     return this.players.length === this.maxPlayers && this.started === false;
   }
 
+  decolorWildCard(card) {
+    if (card.type === 'WildDraw' || card.type === 'Wild') {
+      return {
+        type: card.type,
+        name: `Blank_${card.type}`,
+        color: 'Blank',
+      };
+    }
+    else {
+      return card;
+    }
+  }
+
   // initialized the game
   start() {
     this.startTime = Date.now();
@@ -123,7 +159,7 @@ class Uno {
     // Return card to the deck, shuffle, flip top card to start discard pile
     let firstDiscard = this.deck.shift();
     while (firstDiscard.type === 'WildDraw') {
-      console.log('Uno: first card is WildDraw, reshuffling');
+      console.log('UnoSP: first card is WildDraw, reshuffling');
       this.deck.unshift(firstDiscard);
       this.currentRNG = this.rng();
       this.deck = Deck.shuffleCardsSeeded([...this.deck], this.currentRNG);
@@ -137,7 +173,6 @@ class Uno {
     this.discard(firstDiscard);
     // set the game started flag to true
     this.started = true;
-
     // setup players
     // setup game for all players
     for (const player of this.players) {
@@ -165,6 +200,7 @@ class Uno {
       }
       // the player can always pass after drawing
       moves.push('Pass');
+      // console.log(moves);
       return moves;
     }
 
@@ -212,20 +248,15 @@ class Uno {
         type: card.type,
       };
     }
+
     if (player.hand.some(c => c.name === cardToSearchInhand.name)) {
       // log action: discard
-      this.actions.push({ action:'discard', res: card, target: this.currentPlayer });
+      this.actions.push({ action:'discard', res: card, target: this.currentPlayer, timeStamp:(new Date()).toISOString() });
       // find the card in the player's hand
       const cardIndex = player.hand.findIndex(
         c => c.name === cardToSearchInhand.name,
       );
       player.hand.splice(cardIndex, 1);
-      // if the player hand has only one card left,
-      // allow the player to say UNO
-      // allow the other players to make him draw if they are faster.
-      if (player.hand.length === 1) {
-        this.unoCallback(this.roomUUID);
-      }
       // add the card to the discard pile
       this.discarded.push(card);
       // trigger special card effects
@@ -234,24 +265,30 @@ class Uno {
       // the game is over and the player that won is the one that discarded
       if (player.hand.length === 0) {
         // log action: win
-        this.actions.push({ action:'win', target: this.currentPlayer });
+        this.actions.push({ action:'win', target: this.currentPlayer, timeStamp: (new Date()).toISOString() });
         this.endTime = Date.now();
         this.winner = this.currentPlayer;
         player.wins++;
         this.winCallback(this.roomUUID, `${player.name} ${player.surname}`);
+        // tell the bots to leave, game is finished if the game is a survey
+        if (this.survey) {
+          for (const b of this.bots) {
+            b.leaveNow();
+          }
+        }
       }
     }
     else {
-      console.log('Uno: card not found while discarding');
+      console.log('UnoSP: CARD NOT FOUND WHILE DISCARDING');
     }
+    /* console.log(this.bots[0].gameState.deck);
+    console.log(this.deck); */
+    /*
+    console.log(
+      JSON.stringify(this.bots[0].gameState.deck) == JSON.stringify(this.deck));
+    console.log(this.bots[0].gameState.deck.length == this.deck.length);
+    */
     this.nextTurn();
-  }
-  // used when a player contest another that hasn't called UNO fast enough
-  contestUno() {
-    // log action: contest uno, res contains the player that had to draw
-    this.actions.push({ action:'contest uno', target: this.lastPlayer });
-    // force the last player to draw 2 cards
-    this.forcedDraw(2, this.lastPlayer);
   }
 
   // draws a card from the deck
@@ -259,32 +296,46 @@ class Uno {
     const player = this.players[this.currentPlayer];
     // get a card from the deck
     const newCards = Deck.dealCards(this.deck, this.discarded, 1, this.seed);
+    // console.log(newCards);
     // add the card to the player's hand
     player.hand.push(...newCards);
+    /* console.log('game: ');
+    console.log(player.hand); */
     // callback to update frontend and draw the new card
     this.drawCallback(player.socketId, newCards, this.roomUUID, this.currentPlayer);
     // set the player's hasDrawn flag to true
     player.hasDrawn = true;
     // log action: draw
-    this.actions.push({ action:'draw', res: newCards, target: this.currentPlayer });
+    this.actions.push({ action:'draw', res: newCards, target: this.currentPlayer, timeStamp: (new Date()).toISOString() });
+    /* console.log('deck game:');
+    console.log(this.deck.slice(0, 5));
+    console.log('hands:');
+    for (const pla of this.players) {
+      console.log(pla.hand);
+    } */
   }
 
   // same as draw but used only for special cards effects or contesting
   // takes a number of cards to draw and a player's index
   forcedDraw(number, playerNumber = this.currentPlayer) {
-    // console.log(this.discarded.length);
-    // console.log(this.deck.length);
     const player = this.players[playerNumber];
     const newCards =
       Deck.dealCards(this.deck, this.discarded, number, this.seed);
     player.hand.push(...newCards);
     this.drawCallback(player.socketId, newCards, this.roomUUID, playerNumber);
     // log action: forcedDraw
-    this.actions.push({ action:'forcedDraw', res: newCards, target: playerNumber });
+    this.actions.push({ action:'forcedDraw', res: newCards, target: playerNumber, timeStamp: (new Date()).toISOString() });
   }
 
   // sets the next player's turn
   nextTurn() {
+    /* console.log('Bot hand serverside: ' + this.players[0].hand.map(c => c.name).join(', '));
+    if (this.deck.length > 0) {
+      console.log('deck serverside(' + this.deck.length + '): ' + this.deck[0].name);
+    }
+    else {
+      console.log('deck serverside(' + this.deck.length + '): empty');
+    } */
     this.currentPlayer = this.getNextTurn();
     // reset the player's hasDrawn flag
     this.players[this.currentPlayer].hasDrawn = false;
@@ -321,45 +372,11 @@ class Uno {
       break;
     }
     case 'WildDraw': {
-      const nextPlayer = this.players[this.getNextTurn()];
-      // saving the playerHand after the wild card was played to avoid
-      // problems with contesting if the player draws cards after playing
-      // the wildDraw one from e.g. being contested for UNO
-      const playerHand = [...this.players[this.lastPlayer].hand];
-      this.playerHandAfterWildDraw = playerHand;
-      // callback to let the player know that they can contest
-      this.wild4ContestCallback(this.roomUUID, nextPlayer.socketId);
+      this.nextTurn();
+      // force the next player to draw 2 cards
+      this.forcedDraw(4, this.currentPlayer);
       break;
     }
-    }
-  }
-  contest4(contesting) {
-    if (contesting) {
-      // log action: contest4
-      this.actions.push({ action:'contest4', target: this.currentPlayer });
-      // if the player wants to contest
-      // find the top discard card when the wildDraw was played
-      const lastCard = this.discarded[this.discarded.length - 2];
-      // check if the hand of the player that played the wildDraw
-      // contains any onether card that could be played
-      for (const card of this.playerHandAfterWildDraw) {
-        if (card.type != 'WildDraw' && this.cardIsPlayable(card, lastCard)) {
-          // the player could have played something else than wildDraw
-          // so they'll draw 4 cards
-          this.forcedDraw(4, this.lastPlayer);
-          return;
-        }
-      }
-      // the player couldn't have played something else,
-      // the next player will draw 6 cards and skip turn
-      this.forcedDraw(6, this.currentPlayer);
-      this.nextTurn();
-    }
-    else {
-      // if the player doesn't want to contest,
-      // they will draw 4 cards and skip turn
-      this.forcedDraw(4, this.currentPlayer);
-      this.nextTurn();
     }
   }
 
@@ -394,4 +411,4 @@ class Uno {
     };
   }
 }
-module.exports = Uno;
+module.exports = UnoSP;

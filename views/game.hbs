@@ -1,4 +1,8 @@
-<div id="main" class="main">
+{{#if jitsi}}
+<div id="main" class="w-70">
+{{else}}
+<div id="main" class="w-100">
+{{/if}}
   <div id="game"></div>
 </div>
 <div id="jitsi" class="jitsi"></div>
@@ -64,18 +68,24 @@ const api = new JitsiMeetExternalAPI(domain, options); */
           available : "false"
       });
   })*/
-  // TODO: get real username and replace this placeholder
-  var username= "francescotorgano"
-  var fullname= "{{name}} {{surname}}"
-  var room_name = "{{roomUUID}}"
+  
+  const room_name = "{{roomUUID}}"
 
-  local_jit.init({
-    backgroundColor: "{{color}}",
-    username: username,     //ES. mario.rossi
-    fullname: fullname,     //ES. Mario Rossi
-    room_name: room_name,
-    jitsi_domain: "{{jitsi_domain}}",
-    cbacUrl: "{{cbacUrl}}",
-  })
+  if ({{jitsi}}) {
+    console.log('GameHbs: Initializing jitsi')
+
+    local_jit.init({
+      backgroundColor: "{{color}}",
+      username: "{{name}}{{surname}}",     // TODO: get real username and replace this placeholder
+      fullname: "{{name}} {{surname}}",     //ES. Mario Rossi
+      jitsi_domain: "{{jitsi_domain}}",
+      cbacUrl: "{{cbacUrl}}",
+    })
+  }
+  else {
+    console.log('GameHbs: singleplayer game, no jitsi')
+  }
+
+  
 
 </script>

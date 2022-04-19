@@ -6,25 +6,29 @@ import PlayedCard from './cards/PlayedCard.js';
 const lightColorScheme = {
   background: '#f5f5f5',
   text: '#1c1c1e',
-  boxText: '#1c1c1e', // used in buttons and alerts
-}
+  // used in buttons and alerts
+  boxText: '#1c1c1e',
+};
 const darkColorScheme = {
   background: '#1c1c1e',
   text: '#f5f5f5',
-  boxText: '#1c1c1e', // used in buttons and alerts
-}
+  // used in buttons and alerts
+  boxText: '#1c1c1e',
+};
+const fontFamily = 'Montserrat';
 
 const redCardColor = 0xea323c;
 // const blueCardColor = 0x0098dc;
 // const yellowCardColor = 0xffc825;
 const greenCardColor = 0x33984b;
-const greyColor = 0x999999;
+const greyColor = 0x404040;
 
 export default class UIHandler {
   constructor(scene) {
-    if(scene.colorScheme === 'light') {
+    if (scene.colorScheme === 'light') {
       this.colorScheme = lightColorScheme;
-    } else {
+    }
+    else {
       this.colorScheme = darkColorScheme;
     }
     // setting background color
@@ -65,7 +69,7 @@ export default class UIHandler {
       for (const player of players) {
         let playerText = `${player.name} ${player.surname}, 🎴: ${player.hand}, 🏆: ${player.wins}`;
         if (scene.GameHandler.currentTurn === player.turn) {
-          playerText = '▶' + playerText;
+          playerText = '▶ ' + playerText;
         }
         // if editing this x,y values, make sure to update the x,y
         // values in GameHandler.discardServer
@@ -73,7 +77,7 @@ export default class UIHandler {
           700,
           50 + (player.turn * 50),
           playerText,
-          { fontStyle: 'bold', fontSize: '20px', fill: this.colorScheme.text },
+          { fontStyle: 'bold', fontSize: '20px', fill: this.colorScheme.text, wordWrap: { width: 500 }, fontFamily: fontFamily },
         );
         if (!player.connected) {
           this.tintRed(text);
@@ -84,9 +88,10 @@ export default class UIHandler {
 
     this.buildAlertBox = (text, accept, refuse, timeout) => {
       if (scene.alertBoxGroup) scene.alertBoxGroup.clear(true, true);
+      // disable buttons and ability to draw while alert box is active
+      this.disableButtonsAndDrawing();
       if (scene.playerHandGroup) {
         for (const card of scene.playerHandGroup.getChildren()) {
-          console.log('disabling', card);
           card.disableInteractive();
         }
       }
@@ -101,7 +106,7 @@ export default class UIHandler {
         background.x + 10,
         background.y,
         text,
-        { fontStyle: 'bold', fontSize: '50px', fill: this.colorScheme.boxText, align: 'center', wordWrap: { width: 550 } },
+        { fontStyle: 'bold', fontSize: '50px', fill: this.colorScheme.boxText, align: 'center', wordWrap: { width: 550 }, fontFamily: fontFamily },
       );
       alertBoxText.setOrigin(0.5, 0.5);
       let timeoutVar = null;
@@ -149,6 +154,8 @@ export default class UIHandler {
     };
     this.hideAlertBox = () => {
       scene.alertBoxGroup.clear(true, true);
+      // enable buttons after alert box is closed
+      this.enableButtonsAndDrawing();
       if (scene.playerHandGroup) {
         for (const card of scene.playerHandGroup.getChildren()) {
           card.setInteractive();
@@ -211,13 +218,37 @@ export default class UIHandler {
         card.setScale(0);
         scene.tweens.add({
           targets: card,
-          x: scene.dropZone.x,
-          y: scene.dropZone.y,
+          x: scene.dropZone.x + Phaser.Math.Between(-10, 10),
+          y: scene.dropZone.y + Phaser.Math.Between(-10, 10),
           scale: 0.45,
           duration: 250,
         });
         return card;
       };
+
+    this.showDraw = (drawer) => {
+      if (this.drewGroup && this.drewGroup.countActive() > 0) {
+        this.drewGroup.clear(true, true);
+      }
+      else {
+        this.drewGroup = scene.add.group();
+      }
+
+      const card = scene.add.image(
+        scene.deckArea.x,
+        scene.deckArea.y,
+        'Blank_Deck',
+      );
+      card.setScale(0.45);
+      scene.tweens.add({
+        targets: card,
+        x: scene.PlayersBoardGroup.children.entries[drawer].x,
+        y: scene.PlayersBoardGroup.children.entries[drawer].y,
+        scale: 0,
+        duration: 400,
+      });
+      return card;
+    };
 
     this.showButton = (textContent, callback) => {
       if (this.buttonGroup) this.buttonGroup.clear(true, true);
@@ -234,12 +265,20 @@ export default class UIHandler {
         callback();
         // this.GameHandler.sendUno();
       });
+      const scaleX = button.scaleX;
+      const scaleY = button.scaleY;
+      button.on('pointerover', () => {
+        button.setScale(button.scaleX + 0.02, button.scaleY + 0.02);
+        button.once('pointerout', () => {
+          button.setScale(scaleX, scaleY);
+        });
+      });
       this.buttonGroup.add(button);
       const text = scene.add.text(
         button.x,
         button.y,
         textContent,
-        { fontStyle: 'bold', fontSize: '20px', fill: this.colorScheme.boxText, align: 'center' },
+        { fontStyle: 'bold', fontSize: '20px', fill: this.colorScheme.boxText, align: 'center', fontFamily:fontFamily },
       );
       text.setOrigin(0.5, 0.5);
       this.buttonGroup.add(text);
@@ -248,9 +287,48 @@ export default class UIHandler {
       if (this.buttonGroup) this.buttonGroup.clear(true, true);
     };
 
+    this.showExtraButton = (textContent, callback) => {
+      if (this.extraButtonGroup) this.extraButtonGroup.clear(true, true);
+      this.extraButtonGroup = scene.add.group();
+      const button = scene.add.image(
+        scene.deckArea.x,
+        scene.deckArea.y - scene.deckArea.height + 50,
+        'Blank_Background',
+      );
+      button.setScale(0.4, 0.2);
+      button.setInteractive();
+      button.on('pointerdown', () => {
+        callback();
+        // this.GameHandler.sendUno();
+      });
+      const scaleX = button.scaleX;
+      const scaleY = button.scaleY;
+      button.on('pointerover', () => {
+        button.setScale(button.scaleX + 0.02, button.scaleY + 0.02);
+        button.once('pointerout', () => {
+          button.setScale(scaleX, scaleY);
+        });
+      });
+      this.extraButtonGroup.add(button);
+      const text = scene.add.text(
+        button.x,
+        button.y,
+        textContent,
+        { fontStyle: 'bold', fontSize: '20px', fill: this.colorScheme.boxText, align: 'center', fontFamily:fontFamily },
+      );
+      text.setOrigin(0.5, 0.5);
+      this.extraButtonGroup.add(text);
+    };
+    this.hideExtraButton = () => {
+      if (this.extraButtonGroup) this.extraButtonGroup.clear(true, true);
+    };
+
     this.showColorPicker = (card, discardCallback) => {
       // drop zone -> 470, 300, 170, 230
       // image size 562x388 scaled-> 169x117
+      if (this.colorPickerGroup) this.colorPickerGroup.clear(true, true);
+      // when color picker is shown, disable buttons and ability to draw
+      this.disableButtonsAndDrawing();
       const colors = ['Red', 'Blue', 'Yellow', 'Green'];
       const coords = [
         { x: 400, y: 225 }, { x: 550, y: 225 },
@@ -275,6 +353,12 @@ export default class UIHandler {
         colorCard.on('pointerdown', () => {
           discardCallback(colorCard.rep);
         });
+        colorCard.on('pointerover', () => {
+          colorCard.setScale(colorCard.scale + 0.02);
+          colorCard.once('pointerout', () => {
+            colorCard.setScale(0.3);
+          });
+        });
         scene.colorPickerGroup.add(colorCard);
       }
       // add animation when showing color picker
@@ -292,6 +376,8 @@ export default class UIHandler {
         scale: 0,
         duration: 250,
       });
+      // when color picker is hidden, enable buttons and ability to draw
+      this.enableButtonsAndDrawing();
       // clear color picker group
       scene.colorPickerGroup.clear(true, true);
     };
@@ -317,6 +403,34 @@ export default class UIHandler {
       scene.dropGroup.clear(true, true);
       scene.playerHandGroup.clear(true, true);
       this.buildAlertBox('Waiting for \nplayers...');
+    };
+
+    this.disableButtonsAndDrawing = () => {
+      if (this.buttonGroup) {
+        for (const child of this.buttonGroup.getChildren()) {
+          child.disableInteractive();
+        }
+      }
+      if (this.extraButtonGroup) {
+        for (const child of this.extraButtonGroup.getChildren()) {
+          child.disableInteractive();
+        }
+      }
+      scene.deckArea.card.disableInteractive();
+    };
+
+    this.enableButtonsAndDrawing = () => {
+      if (this.buttonGroup) {
+        for (const child of this.buttonGroup.getChildren()) {
+          child.setInteractive();
+        }
+      }
+      if (this.extraButtonGroup) {
+        for (const child of this.extraButtonGroup.getChildren()) {
+          child.setInteractive();
+        }
+      }
+      scene.deckArea.card.setInteractive();
     };
 
     this.tintRed = (gameObject) => {

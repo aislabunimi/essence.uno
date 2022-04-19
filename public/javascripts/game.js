@@ -6,6 +6,7 @@ const config = {
   parent: 'game',
   scale:{
     mode: Phaser.Scale.FIT,
+    autoCenter: Phaser.Scale.CENTER_BOTH,
     width: 1200,
     height: 1000,
   },
@@ -15,7 +16,7 @@ const config = {
 window.onload = () => {
   if (!document.cookie) {
     // console.log('no cookie');
-    window.history.go(-1);
+    window.location = document.referrer;
     return;
   }
   new Phaser.Game(config);

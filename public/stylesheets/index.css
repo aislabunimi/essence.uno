@@ -4,7 +4,7 @@ body {
 }
 
 h1 {
-  color: #3f51b5;
+  color: #6495ed;
 }
 
 input {
@@ -25,6 +25,13 @@ select {
   width: 50%;
 }
 
+a:visited {
+  color: #6495ed;
+}
+h4 {
+  margin: 5px 0px;
+}
+
 button {
   /* remove default behavior */
   appearance: none;
@@ -34,7 +41,7 @@ button {
   margin: 20px;
   padding: 10px;
   border: none;
-  background-color: #3f51b5;
+  background-color: #6495ed;
   color: #fff;
   font-weight: 600;
   border-radius: 5px;
@@ -43,6 +50,10 @@ button {
 .centered {
   display: block;
   text-align: center;
+  margin: 0 auto;
+}
+.half {
+  width: 50%;
 }
 .centered-table {
   width: 50%;
@@ -66,5 +77,13 @@ button {
   body {
     background-color: #1c1c1e;
     color: white;
+  }
+}
+
+@media only screen 
+and (min-device-width : 320px) 
+and (max-device-width : 480px) {
+  .half {
+    width: 90%;
   }
 }

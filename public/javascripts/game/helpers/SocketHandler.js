@@ -5,16 +5,16 @@ export default class SocketHandler {
 
     // joining room
     console.log(
-      `joining room ${scene.roomUUID}, with name ${scene.user.name} ${scene.user.surname}`,
+      `SocketHandler: joining room ${scene.roomUUID}, with name ${scene.user.name} ${scene.user.surname}`,
     );
     this.socket.emit('join_room', scene.roomUUID, scene.user.name, scene.user.surname, scene.user.uuid);
     this.socket.on('room_not_found', () => {
       // go back to lobby
-      window.history.back();
+      window.location = document.referrer;
     });
 
-    this.socket.on('setup', (myTurn, currentTurn, cards, discard) => {
-      scene.GameHandler.setup(myTurn, currentTurn, cards, discard);
+    this.socket.on('setup', (myTurn, currentTurn, cards, discard, hasDrawn, isSurvey) => {
+      scene.GameHandler.setup(myTurn, currentTurn, cards, discard, hasDrawn, isSurvey);
     });
     this.socket.on('discard', (card) => {
       scene.GameHandler.discardServer(card);
@@ -27,6 +27,9 @@ export default class SocketHandler {
     });
     this.socket.on('draw', cards => {
       scene.GameHandler.draw(cards);
+    });
+    this.socket.on('show_draw', (cardsNumber, drawer) => {
+      scene.GameHandler.showDraw(cardsNumber, drawer);
     });
     this.socket.on('current_turn', (currentTurn) => {
       scene.GameHandler.updateTurn(currentTurn);
@@ -52,6 +55,9 @@ export default class SocketHandler {
     this.socket.on('room_full', () => {
       scene.GameHandler.full();
     });
+    this.socket.on('survey_game_done', () => {
+      scene.GameHandler.surveyGameDone();
+    });
     this.socket.on('disconnected', () => {
       scene.GameHandler.disconnect();
     });
@@ -73,5 +79,8 @@ export default class SocketHandler {
   }
   contest4(bool) {
     this.socket.emit('contest_4', bool);
+  }
+  feedback(k, v) {
+    this.socket.emit('feedback', k, v);
   }
 }

@@ -1,0 +1,109 @@
+:root {
+  --background: #ffffff;
+  --background-alt: #d6d6d6;
+  --text: #000000;
+  --accent: #6495ed;
+  --button-text: #ffffff;
+}
+.sv_main{
+  font-family: "Montserrat", sans-serif !important;
+  font-size: 16px !important;
+}
+.sv_body{
+  background-color: var(--background) !important;
+  color: var(--text) !important;
+  border-color: var(--accent) !important;
+}
+.sv_body:hover{
+  border-color: var(--accent) !important;
+}
+.sv_q{
+  background-color: var(--background) !important;
+  color: var(--text) !important;
+}
+.sv_q_title{
+  color: var(--text) !important;
+}
+.sv_q_text_root{
+  width: 90% !important;
+  box-shadow: none !important;
+  margin: 0 auto !important;
+}
+.sv_page_title{
+  font-size: 20px !important;
+  font-weight: bold !important;
+}
+input[type=button]{
+  color: var(--button-text) !important;
+  width: 40% !important;
+  padding: 0 !important;
+}
+/* .sv_complete_btn{
+  color: var(--button-text) !important;
+  width: 40% !important;
+}
+.sv_prev_btn{
+  color: var(--button-text) !important;
+  width: 40% !important;
+} */
+.sv-ranking{
+  background-color: var(--background) !important;
+  margin: 0 auto;
+}
+.sv-ranking-item__content{
+  background-color: var(--background) !important;
+  color: var(--text) !important;
+  font-family: "Montserrat", sans-serif !important;
+}
+
+.sv-ranking-item__index {
+  /* background-color: var(--background) !important; */
+  color: var(--text) !important;
+  background: var(--accent) none repeat scroll 0% 0% !important;
+}
+.sv-ranking-item__icon {
+  fill: var(--accent) !important;
+}
+.sv-ranking-item__ghost {
+  background: var(--background-alt) none repeat scroll 0% 0% !important;
+}
+div.sv-ranking:nth-child(8) {
+  font-family: "Montserrat", sans-serif !important;
+}
+.sv_main .sv_container .sv_body .sv_p_root .sv_q_rating .sv_q_rating_item:not(:nth-child(2)) .sv_q_rating_item_text:not(:hover) {
+  border-left-color: #e7e7e7 !important;
+}
+.sv_qstn {
+  min-width: 0 !important;
+}
+.sv_row {
+  min-width: 0 !important;
+}
+.sv_row > div {
+  min-width: 0 !important;
+}
+.noUi-connect {
+  background: var(--accent) none repeat scroll 0% 0% !important;
+}
+.sv_q.sv_qstn {
+  padding-bottom: 10px !important;
+}
+.sv_q.sv_qstn > div > div {
+  padding-top: 10px !important;
+  padding-bottom: 10px !important;
+}
+.sv-boolean__slider {
+  margin-right: 37px !important;
+}
+#survey-information{
+  padding-bottom: 20px;
+}
+
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #1c1c1e;
+    --background-alt: #454549;
+    --text: #faf0e6;
+  }
+}
