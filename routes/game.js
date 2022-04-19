@@ -19,7 +19,7 @@ router.post('/', function(req, res, next) {
     name: req.session.name,
     surname: req.session.surname,
     color: '#ffffff',
-    jitsi: req.session.roomType == 'multiplayer' ? true : false,
+    jitsi: req.session.roomType == 'multiplayer_jitsi' ? true : false,
     jitsi_domain: config.JITSI_INSTANCE,
     cbacUrl: config.CBAC_HOSTNAME,
   });

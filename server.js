@@ -30,7 +30,7 @@ io.on('connection', (socket) => {
 
   // handling create_room_multiplayer event
   socket.on('create_room_multiplayer', (roomName, maxPlayers) => {
-    console.log(roomName, ': created for', maxPlayers, 'players');
+    console.log(roomName, ': created for', maxPlayers, 'players (multiplayer)');
     // check if rooms contains a room with name name
     if (rooms.find((room) => room.uuid === roomName)) {
       // if room already exists, don't create a new room
@@ -43,6 +43,33 @@ io.on('connection', (socket) => {
       name: roomName,
       uuid: roomUUID,
       type: 'multiplayer',
+      startTime: Date.now(),
+      endTime: null,
+      gamesPlayed: 0,
+      players: 0,
+      maxPlayers: maxPlayers,
+      game: new Uno(
+        roomUUID, maxPlayers, setupPlayerCallback, drawCallback,
+        unoCallback, wild4ContestCallback, winCallback),
+      rounds: [],
+    };
+    rooms.push(newRoom);
+    socket.emit('room_created', newRoom.uuid);
+  });
+  socket.on('create_room_jitsi', (roomName, maxPlayers) => {
+    console.log(roomName, ': created for', maxPlayers, 'players (multiplayer jitsi)');
+    // check if rooms contains a room with name name
+    if (rooms.find((room) => room.uuid === roomName)) {
+      // if room already exists, don't create a new room
+      console.log(roomName, ': room already exists');
+      return;
+    }
+    // create a new room and add it to rooms array
+    const roomUUID = uuidv4();
+    const newRoom = {
+      name: roomName,
+      uuid: roomUUID,
+      type: 'multiplayer_jitsi',
       startTime: Date.now(),
       endTime: null,
       gamesPlayed: 0,
@@ -374,7 +401,9 @@ function wild4ContestCallback(roomUUID, socketId) {
   contest4Timeout = setTimeout(() => {
     io.to(socketId).emit('clear_draw_four');
     const room = rooms.find((r) => r.uuid === roomUUID);
-    room.game.contest4(false);
+    if (room && room.game) {
+      room.game.contest4(false);
+    }
   }
   , 10000);
 }

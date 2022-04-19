@@ -5,50 +5,59 @@ const nPlayersInput = document.getElementById('nPlayers');
 // opening socket
 const socket = io();
 
-// if the user doesn't have a name, surname and a room name, can't create a room
+// if the user doesn't have a name and a room name, can't create a room
 function createRoom(e) {
   console.log('Index: creating room...');
   e.preventDefault();
   if (document.getElementById('name').checkValidity() &&
-    document.getElementById('surname').checkValidity() &&
     document.getElementById('roomName').checkValidity()
   ) {
     const roomType = document.getElementById('roomType').value;
-    if (roomType == 'multiplayer') {
+    switch (roomType) {
+    case 'singleplayer':
+      // single
+      document.cookie = 'gameType="singleplayer"; SameSite=Strict';
+      socket.emit('create_room_singleplayer', roomNameInput.value, document.getElementById('difficulty').value);
+      break;
+    case 'multiplayer':
+      // multi
       document.cookie = 'gameType="multiplayer"; SameSite=Strict';
       socket.emit('create_room_multiplayer', roomNameInput.value, parseInt(nPlayersInput.value));
-    }
-    else {
-      document.cookie = 'gameType="singleplayer"; SameSite=Strict';
-      const difficulty = document.getElementById('difficulty').value;
-      socket.emit('create_room_singleplayer', roomNameInput.value, difficulty);
+      break;
+    case 'multiplayer_jitsi':
+      // multi_jitsi
+      document.cookie = 'gameType="multiplayer_jitsi"; SameSite=Strict';
+      socket.emit('create_room_jitsi', roomNameInput.value, parseInt(nPlayersInput.value));
+      break;
+    default:
+      console.log('Room type not found');
     }
     // console.log("creating room: ", roomNameInput.value);
     // notify the server about new room
     // saving to cookies
     document.cookie = `name=${document.getElementById('name').value}; SameSite=Strict`;
-    document.cookie = `surname=${document.getElementById('surname').value}; SameSite=Strict`;
+    document.cookie = `roomName=${roomNameInput.value}; SameSite=Strict`;
   }
 }
 const form = document.getElementById('form');
 form.addEventListener('submit', createRoom, true);
 
-// the user needs a name and surname to join a room
-function joinRoom(uuid) {
-  if (document.getElementById('name').checkValidity() &&
-   document.getElementById('surname').checkValidity()) {
+// the user needs a name to join a room
+function joinRoom(uuid, roomType) {
+  if (document.getElementById('name').checkValidity()) {
     // adding data to an hidden input to pass it to the server
     document.getElementById('roomUUID').value = uuid;
     // saving to cookies
     document.cookie = `name=${document.getElementById('name').value}; SameSite=Strict`;
-    document.cookie = `surname=${document.getElementById('surname').value}; SameSite=Strict`;
     document.cookie = `roomUUID=${uuid}; SameSite=Strict`;
-    document.cookie = 'gameType="multiplayer"; SameSite=Strict';
+    console.log(roomType);
+    document.cookie = `gameType=${roomType}; SameSite=Strict`;
+    document.getElementById('roomType').value = roomType;
     // submit form
     document.getElementById('form').submit();
   }
   else {
-    alert('Please enter your name and surname');
+    alert('Please enter a name');
   }
 }
 
@@ -68,9 +77,6 @@ window.onload = () => {
   }
   if (getCookie('name') != '') {
     document.getElementById('name').value = getCookie('name');
-  }
-  if (getCookie('surname') != '') {
-    document.getElementById('surname').value = getCookie('surname');
   }
 };
 

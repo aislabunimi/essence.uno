@@ -5,9 +5,6 @@
     <form method="post" id="form" action="/game">
       <h3>Choose a Name</h3>
       <input type="text" name="name" id="name" placeholder="Name" autocomplete="off" required />
-      <h3>Choose a Surname</h3>
-      <input type="text" name="surname" id="surname" placeholder="Surname" autocomplete="off" required />
-      <br />
       <h3>Choose a Room Name, if you want to create a new one</h3>
       <input type="text" name="roomName" id="roomName" minlength="3" required autocomplete="off"
         placeholder="Room Name" />
@@ -15,6 +12,7 @@
       <select name="roomType" id="roomType" onchange="updateNPlayersSelect()">
         <option value="singleplayer">Singleplayer</option>
         <option value="multiplayer">Multiplayer</option>
+        <option value="multiplayer_jitsi">Multiplayer(Jitsi)</option>
       </select>
       <h3 id="difficultyH3">Choose the difficulty</h3>
       <select name="difficulty" id="difficulty" required>
@@ -55,6 +53,7 @@
       <tr>
         <th>Room name</th>
         <th>Players</th>
+        <th>Type</th>
         <th></th>
       </tr>
       <tbody id="rows">
@@ -62,7 +61,8 @@
         <tr>
           <td>{{this.name}}</td>
           <td>{{this.players}}/{{this.maxPlayers}}</td>
-          <td><button onclick="joinRoom('{{this.uuid}}')">Join</button></td>
+          <td>{{this.type}}</td>
+          <td><button onclick="joinRoom('{{this.uuid}}','{{this.type}}')">Join</button></td>
         </tr>
         {{/each}}
       </tbody>
