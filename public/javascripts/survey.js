@@ -3,7 +3,7 @@ const socket = io();
 
 $('#clearSurveyButton').on('click', clearSurvey);
 
-const difficulties = ['RandomPlay', 'GreedyMiniMax2A075', 'ABMMT2K03'];
+const difficulties = ['RandomPlay', 'ABMMT2K0', 'ABMMT2K03'];
 const gamesD = JSON.parse(window.localStorage.getItem('games'));
 if (gamesD) {
   // count won games in gamesD
